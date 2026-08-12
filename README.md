@@ -18,7 +18,7 @@ This addon requires the following mods:
 And optional mods:
 | Mod | Version |
 |-----|---------|
-| TFC Ambiental | 1.0.1 |
+| TFC Ambential | 1.0.1 |
 | NTM Space | 0.9.2 |
 
 
