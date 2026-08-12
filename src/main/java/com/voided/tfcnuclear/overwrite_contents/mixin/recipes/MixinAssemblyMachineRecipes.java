@@ -15,8 +15,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.hbm.inventory.OreDictManager.*;
-import static com.hbm.inventory.OreDictManager.ANY_PLASTIC;
-import static com.hbm.inventory.OreDictManager.DURA;
 
 @Mixin(AssemblyMachineRecipes.class)
 public class MixinAssemblyMachineRecipes {
@@ -30,54 +28,168 @@ public class MixinAssemblyMachineRecipes {
     private void removeRecipes() {
         AssemblyMachineRecipes instance = AssemblyMachineRecipes.INSTANCE;
 
-        // Список рецептов для удаления
         String[] recipesToRemove = {
                 "ass.plateiron",
                 "ass.platecopper",
                 "ass.plategold",
                 "ass.excavator",
-                "ass.mininglaser"
+                "ass.mininglaser",
+                "ass.crackingtower",
+                "ass.hydrotreater",
+                "ass.reformer",
+                "ass.strandcaster",
+                "ass.assembler"
         };
 
-        int removed = 0;
         for (String recipeName : recipesToRemove) {
-            // Используем встроенный метод removeRecipeByName
             instance.removeRecipeByName(recipeName);
-            removed++;
         }
     }
 
     private void addCustomRecipes() {
         AssemblyMachineRecipes instance = AssemblyMachineRecipes.INSTANCE;
 
-        // Рецепт: Wrought Iron Ingot -> Iron Plate (заменяем удаленный ass.plateiron)
         instance.register(new GenericRecipe("ass.new_plateWroughtIron")
                 .setup(60, 100)
                 .outputItems(new ItemStack(ModItems.plate_iron, 1))
                 .inputItems(new RecipesCommon.OreDictStack("ingotWroughtIron"))
                 .setPools(GenericRecipes.POOL_PREFIX_ALT + "plates"));
+
         instance.register(new GenericRecipe("ass.new_plateBronze")
                 .setup(60, 100)
                 .outputItems(new ItemStack(ModItems.plate_copper, 1))
                 .inputItems(new RecipesCommon.OreDictStack("ingotBronze"))
                 .setPools(GenericRecipes.POOL_PREFIX_ALT + "plates"));
 
-        // Рецепт: Экскаватор с кованым железом вместо обычного (заменяем удаленный ass.excavator)
         instance.register(new GenericRecipe("ass.new_excavator")
                 .setup(200, 100)
                 .outputItems(new ItemStack(ModBlocks.machine_excavator, 1))
                 .inputItems(
-                        new RecipesCommon.OreDictStack("stoneBrick", 8),
-                        new RecipesCommon.OreDictStack(STEEL.ingot(), 8),
-                        new RecipesCommon.OreDictStack("ingotWroughtIron", 8),
-                        new RecipesCommon.ComparableStack(ModItems.motor, 2),
-                        new RecipesCommon.ComparableStack(ModItems.circuit, 1, ItemEnums.EnumCircuitType.ANALOG)
+                        new RecipesCommon.OreDictStack("unknownConcrete", 16),
+                        new RecipesCommon.OreDictStack("sheetDoubleSteel", 8),
+                        new RecipesCommon.OreDictStack("ingotWroughtIron", 12),
+                        new RecipesCommon.OreDictStack("shellTitanium", 4),
+                        new RecipesCommon.ComparableStack(ModItems.motor, 4),
+                        new RecipesCommon.ComparableStack(ModItems.circuit, 2, ItemEnums.EnumCircuitType.ANALOG)
                 ));
+
         instance.register(new GenericRecipe("ass.mininglaser_new")
                 .setup(400, 100)
                 .outputItems(new ItemStack(ModBlocks.machine_mining_laser, 1))
-                .inputItems(new RecipesCommon.OreDictStack(STEEL.plate(), 16), new RecipesCommon.OreDictStack(TI.shell(), 4), new RecipesCommon.OreDictStack(DURA.plate(), 4), new RecipesCommon.ComparableStack(ModItems.crystal_redstone, 3), new RecipesCommon.ComparableStack(Item.getByNameOrId("tfc:gem/diamond"), 3, 2), new RecipesCommon.OreDictStack(ANY_PLASTIC.ingot(), 8), new RecipesCommon.ComparableStack(ModItems.motor, 3))
-                .inputItemsEx(new RecipesCommon.ComparableStack(ModItems.item_expensive, 4, ItemEnums.EnumExpensiveType.HEAVY_FRAME), new RecipesCommon.OreDictStack(DURA.plate(), 4), new RecipesCommon.ComparableStack(ModItems.crystal_redstone, 12), new RecipesCommon.OreDictStack(ANY_PLASTIC.ingot(), 16), new RecipesCommon.ComparableStack(ModItems.motor_desh, 3)));
+                .inputItems(
+                        new RecipesCommon.OreDictStack(STEEL.plate(), 16),
+                        new RecipesCommon.OreDictStack(TI.shell(), 4),
+                        new RecipesCommon.OreDictStack(DURA.plate(), 4),
+                        new RecipesCommon.ComparableStack(ModItems.crystal_redstone, 3),
+                        new RecipesCommon.ComparableStack(Item.getByNameOrId("tfc:gem/diamond"), 3, 2),
+                        new RecipesCommon.OreDictStack(ANY_PLASTIC.ingot(), 8),
+                        new RecipesCommon.ComparableStack(ModItems.motor, 3)
+                )
+                .inputItemsEx(
+                        new RecipesCommon.ComparableStack(ModItems.item_expensive, 4, ItemEnums.EnumExpensiveType.HEAVY_FRAME),
+                        new RecipesCommon.OreDictStack(DURA.plate(), 4),
+                        new RecipesCommon.ComparableStack(ModItems.crystal_redstone, 12),
+                        new RecipesCommon.OreDictStack(ANY_PLASTIC.ingot(), 16),
+                        new RecipesCommon.ComparableStack(ModItems.motor_desh, 3)
+                ));
 
+        instance.register(new GenericRecipe("ass.crackingtower_new")
+                .setup(200, 100)
+                .outputItems(new ItemStack(ModBlocks.machine_catalytic_cracker, 1))
+                .inputItems(
+                        new RecipesCommon.ComparableStack(ModBlocks.steel_scaffold, 16),
+                        new RecipesCommon.OreDictStack(STEEL.shell(), 6),
+                        new RecipesCommon.OreDictStack(DESH.ingot(), 12),
+                        new RecipesCommon.ComparableStack(com.voided.tfcnuclear.inventory.items.ModItems.FIRED_CATALYST_CLAY, 12),
+                        new RecipesCommon.OreDictStack(NB.ingot(), 4)
+                )
+                .inputItemsEx(
+                        new RecipesCommon.ComparableStack(ModItems.item_expensive, 2, ItemEnums.EnumExpensiveType.HEAVY_FRAME),
+                        new RecipesCommon.ComparableStack(ModItems.item_expensive, 8, ItemEnums.EnumExpensiveType.STEEL_PLATING),
+                        new RecipesCommon.OreDictStack(ANY_PLASTIC.ingot(), 16),
+                        new RecipesCommon.ComparableStack(com.voided.tfcnuclear.inventory.items.ModItems.FIRED_CATALYST_CLAY, 16),
+                        new RecipesCommon.OreDictStack(NB.ingot(), 4)
+                )
+                .setPools528(GenericRecipes.POOL_PREFIX_528 + "plastic"));
+
+        instance.register(new GenericRecipe("ass.hydrotreater_new")
+                .setup(200, 100)
+                .outputItems(new ItemStack(ModBlocks.machine_hydrotreater, 1))
+                .inputItems(
+                        new RecipesCommon.OreDictStack(STEEL.plateWelded(), 8),
+                        new RecipesCommon.OreDictStack(CU.plateCast(), 4),
+                        new RecipesCommon.OreDictStack(NB.ingot(), 8),
+                        new RecipesCommon.OreDictStack(ANY_RESISTANTALLOY.ingot(), 4),
+                        new RecipesCommon.OreDictStack(STEEL.shell(), 2),
+                        new RecipesCommon.OreDictStack(STEEL.pipe(), 8),
+                        new RecipesCommon.ComparableStack(com.voided.tfcnuclear.inventory.items.ModItems.FIRED_CATALYST_CLAY, 24),
+                        new RecipesCommon.ComparableStack(ModItems.motor_desh, 2),
+                        new RecipesCommon.ComparableStack(ModItems.circuit, 1, ItemEnums.EnumCircuitType.BISMOID)
+                )
+                .inputItemsEx(
+                        new RecipesCommon.ComparableStack(ModItems.item_expensive, 2, ItemEnums.EnumExpensiveType.BRONZE_TUBES),
+                        new RecipesCommon.OreDictStack(NB.ingot(), 8),
+                        new RecipesCommon.OreDictStack(ANY_RESISTANTALLOY.ingot(), 4),
+                        new RecipesCommon.OreDictStack(DURA.pipe(), 16),
+                        new RecipesCommon.ComparableStack(com.voided.tfcnuclear.inventory.items.ModItems.FIRED_CATALYST_CLAY, 32),
+                        new RecipesCommon.ComparableStack(ModItems.motor_desh, 8),
+                        new RecipesCommon.ComparableStack(ModItems.circuit, 4, ItemEnums.EnumCircuitType.BISMOID),
+                        new RecipesCommon.ComparableStack(ModItems.item_expensive, 1, ItemEnums.EnumExpensiveType.COMPUTER)
+                )
+                .setPools528(GenericRecipes.POOL_PREFIX_528 + "hardplastic"));
+
+        instance.register(new GenericRecipe("ass.reformer_new")
+                .setup(200, 100)
+                .outputItems(new ItemStack(ModBlocks.machine_catalytic_reformer, 1))
+                .inputItems(
+                        new RecipesCommon.OreDictStack(STEEL.plateCast(), 12),
+                        new RecipesCommon.OreDictStack(CU.plate(), 8),
+                        new RecipesCommon.OreDictStack(NB.ingot(), 8),
+                        new RecipesCommon.OreDictStack(ANY_RESISTANTALLOY.ingot(), 4),
+                        new RecipesCommon.OreDictStack(STEEL.shell(), 3),
+                        new RecipesCommon.OreDictStack(STEEL.pipe(), 8),
+                        new RecipesCommon.ComparableStack(com.voided.tfcnuclear.inventory.items.ModItems.FIRED_CATALYST_CLAY, 24),
+                        new RecipesCommon.ComparableStack(ModItems.motor, 1),
+                        new RecipesCommon.ComparableStack(ModItems.circuit, 1, ItemEnums.EnumCircuitType.BISMOID)
+                )
+                .inputItemsEx(
+                        new RecipesCommon.ComparableStack(ModItems.item_expensive, 2, ItemEnums.EnumExpensiveType.BRONZE_TUBES),
+                        new RecipesCommon.OreDictStack(NB.ingot(), 8),
+                        new RecipesCommon.OreDictStack(ANY_RESISTANTALLOY.ingot(), 4),
+                        new RecipesCommon.OreDictStack(DURA.pipe(), 16),
+                        new RecipesCommon.ComparableStack(com.voided.tfcnuclear.inventory.items.ModItems.FIRED_CATALYST_CLAY, 32),
+                        new RecipesCommon.ComparableStack(ModItems.motor, 8),
+                        new RecipesCommon.ComparableStack(ModItems.circuit, 4, ItemEnums.EnumCircuitType.BISMOID),
+                        new RecipesCommon.ComparableStack(ModItems.item_expensive, 1, ItemEnums.EnumExpensiveType.COMPUTER)
+                )
+                .setPools528(GenericRecipes.POOL_PREFIX_528 + "hardplastic"));
+
+        instance.register(new GenericRecipe("ass.strandcaster_new")
+                .setup(200, 100)
+                .outputItems(new ItemStack(ModBlocks.machine_strand_caster, 1))
+                .inputItems(
+                        new RecipesCommon.ComparableStack(ModBlocks.brick_fire, 18),
+                        new RecipesCommon.OreDictStack(STEEL.plateCast(), 6),
+                        new RecipesCommon.OreDictStack(CU.plateWelded(), 2),
+                        new RecipesCommon.OreDictStack(STEEL.shell(), 2),
+                        new RecipesCommon.OreDictStack(ANY_CONCRETE.any(), 8)
+                )
+                .inputItemsEx(
+                        new RecipesCommon.ComparableStack(ModItems.item_expensive, 1, ItemEnums.EnumExpensiveType.HEAVY_FRAME),
+                        new RecipesCommon.ComparableStack(ModBlocks.brick_fire, 20),
+                        new RecipesCommon.OreDictStack(STEEL.shell(), 4),
+                        new RecipesCommon.OreDictStack(ANY_CONCRETE.any(), 8)
+                ));
+
+        instance.register(new GenericRecipe("ass.assembler_new")
+                .setup(200, 100)
+                .outputItems(new ItemStack(ModBlocks.machine_assembly_machine, 1))
+                .inputItems(
+                        new RecipesCommon.OreDictStack("sheetDoubleSteel", 4),
+                        new RecipesCommon.OreDictStack(CU.plate(), 4),
+                        new RecipesCommon.OreDictStack("shellTitanium", 2),
+                        new RecipesCommon.ComparableStack(ModItems.motor, 2),
+                        new RecipesCommon.ComparableStack(ModItems.circuit, 1, ItemEnums.EnumCircuitType.ANALOG)
+                ));
     }
 }

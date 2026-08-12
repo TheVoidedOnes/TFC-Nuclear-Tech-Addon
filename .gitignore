@@ -32,6 +32,10 @@ Thumbs.db
 run/
 eclipse/
 src/main/resources/META-INF/MANIFEST.MF
+src/main/java/com/voided/tfcnuclear/inventory/blocks
+src/main/resources/assets/tfcnuclear/models/block
+src/main/resources/assets/tfcnuclear/textures/blocks
+src/main/resources/assets/tfcnuclear/textures/gui
 
 # Backup files
 *.bak

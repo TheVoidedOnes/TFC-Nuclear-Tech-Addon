@@ -5,7 +5,7 @@ import com.hbm.inventory.recipes.BlastFurnaceRecipesNT;
 import com.hbm.inventory.recipes.BlastFurnaceRecipe;
 import com.hbm.inventory.RecipesCommon;
 import com.hbm.items.ModItems;
-import com.voided.tfcnuclear.compat.hbm.SlagStack;
+import com.voided.tfcnuclear.compat.hbm.SlagAStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,77 +39,128 @@ public class MixinHBMBlastFurnaceRecipes {
                 "blast.firebrickLimestone"
         };
 
-        int removed = 0;
         for (String recipeName : recipesToRemove) {
-            // Используем встроенный метод removeRecipeByName
             instance.removeRecipeByName(recipeName);
-            removed++;
         }
     }
 
     private void addCustomRecipes() {
         BlastFurnaceRecipesNT instance = BlastFurnaceRecipesNT.INSTANCE;
 
-        // 1. Рецепты: Шлак (100) + Флюс -> Неочищенная крица (100)
-        // Гематитовый шлак
-        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_hematite")
-                .setDuration(800)
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_hematite_1")
+                .setDuration(600)
                 .inputItems(
-                        new SlagStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.HEMATITE_SLAG, 1), 100),
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.HEMATITE_SLAG, 1), 100),
                         new RecipesCommon.OreDictStack("sand", 1)
                 )
-                .outputItems(
-                        createBloomWithAmount("tfc:bloom/unrefined", 100)
-                ));
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 100)));
 
-        // Магнетитовый шлак
-        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_magnetite")
-                .setDuration(800)
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_magnetite_1")
+                .setDuration(600)
                 .inputItems(
-                        new SlagStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.MAGNETITE_SLAG, 1), 100),
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.MAGNETITE_SLAG, 1), 100),
                         new RecipesCommon.OreDictStack("sand", 1)
                 )
-                .outputItems(
-                        createBloomWithAmount("tfc:bloom/unrefined", 100)
-                ));
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 100)));
 
-        // Лимонитовый шлак
-        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_limonite")
-                .setDuration(800)
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_limonite_1")
+                .setDuration(600)
                 .inputItems(
-                        new SlagStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.LIMONITE_SLAG, 1), 100),
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.LIMONITE_SLAG, 1), 100),
                         new RecipesCommon.OreDictStack("sand", 1)
                 )
-                .outputItems(
-                        createBloomWithAmount("tfc:bloom/unrefined", 100)
-                ));
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 100)));
 
-        // 2. Рецепт: Слиток железа + Флюс -> Неочищенная крица (100)
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_hematite_2")
+                .setDuration(1000)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.HEMATITE_SLAG, 1), 200),
+                        new RecipesCommon.OreDictStack("sand", 2)
+                )
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 200)));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_magnetite_2")
+                .setDuration(1000)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.MAGNETITE_SLAG, 1), 200),
+                        new RecipesCommon.OreDictStack("sand", 2)
+                )
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 200)));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_limonite_2")
+                .setDuration(1000)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.LIMONITE_SLAG, 1), 200),
+                        new RecipesCommon.OreDictStack("sand", 2)
+                )
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 200)));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_hematite_3")
+                .setDuration(1400)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.HEMATITE_SLAG, 1), 300),
+                        new RecipesCommon.OreDictStack("sand", 3)
+                )
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 300)));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_magnetite_3")
+                .setDuration(1400)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.MAGNETITE_SLAG, 1), 300),
+                        new RecipesCommon.OreDictStack("sand", 3)
+                )
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 300)));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_limonite_3")
+                .setDuration(1400)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.LIMONITE_SLAG, 1), 300),
+                        new RecipesCommon.OreDictStack("sand", 3)
+                )
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 300)));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_hematite_4")
+                .setDuration(1800)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.HEMATITE_SLAG, 1), 400),
+                        new RecipesCommon.OreDictStack("sand", 4)
+                )
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 400)));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_magnetite_4")
+                .setDuration(1800)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.MAGNETITE_SLAG, 1), 400),
+                        new RecipesCommon.OreDictStack("sand", 4)
+                )
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 400)));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_limonite_4")
+                .setDuration(1800)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.LIMONITE_SLAG, 1), 400),
+                        new RecipesCommon.OreDictStack("sand", 4)
+                )
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 400)));
+
         instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_iron_ingot")
-                .setDuration(800)
+                .setDuration(500)
                 .inputItems(
                         new RecipesCommon.OreDictStack("ingotIron", 1),
                         new RecipesCommon.OreDictStack("sand", 1)
                 )
-                .outputItems(
-                        createBloomWithAmount("tfc:bloom/unrefined", 100)
-                ));
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 100)));
 
-        // 3. Рецепт: Пыль железа + Флюс -> Неочищенная крица (100)
         instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.bloom_iron_dust")
-                .setDuration(800)
+                .setDuration(500)
                 .inputItems(
                         new RecipesCommon.OreDictStack("dustIron", 1),
                         new RecipesCommon.OreDictStack("sand", 1)
                 )
-                .outputItems(
-                        createBloomWithAmount("tfc:bloom/unrefined", 100)
-                ));
+                .outputItems(createBloomWithAmount("tfc:bloom/unrefined", 100)));
 
-        // Оригинальные рецепты из вашего кода
-        // Рецепт: Iron Ingot + Flux -> Pig Iron
         instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.tfc_pig_iron_ingot")
-                .setDuration(800)
+                .setDuration(700)
                 .inputItems(
                         new RecipesCommon.OreDictStack("ingotIron", 1),
                         new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 1)
@@ -119,9 +170,8 @@ public class MixinHBMBlastFurnaceRecipes {
                         new ItemStack(ModItems.ingot_raw, 1, Mats.MAT_SLAG.id)
                 ));
 
-        // Рецепт: Iron Dust + Flux -> Pig Iron
         instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.tfc_pig_iron_dust")
-                .setDuration(800)
+                .setDuration(700)
                 .inputItems(
                         new RecipesCommon.OreDictStack("dustIron", 1),
                         new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 1)
@@ -131,44 +181,139 @@ public class MixinHBMBlastFurnaceRecipes {
                         new ItemStack(ModItems.ingot_raw, 1, Mats.MAT_SLAG.id)
                 ));
 
-        // Рецепты шлаков -> Pig Iron
-        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_hematite")
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_hematite_1")
                 .setDuration(800)
                 .inputItems(
-                        new SlagStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.HEMATITE_SLAG, 1), 100),
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.HEMATITE_SLAG, 1), 100),
                         new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 1)
                 )
                 .outputItems(
-                        new ItemStack((Item.getByNameOrId("tfc:metal/ingot/pig_iron")), 1),
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 1),
                         new ItemStack(ModItems.ingot_raw, 1, Mats.MAT_SLAG.id)
                 ));
 
-        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_magnetite")
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_magnetite_1")
                 .setDuration(800)
                 .inputItems(
-                        new SlagStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.MAGNETITE_SLAG, 1), 100),
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.MAGNETITE_SLAG, 1), 100),
                         new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 1)
                 )
                 .outputItems(
-                        new ItemStack((Item.getByNameOrId("tfc:metal/ingot/pig_iron")), 1),
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 1),
                         new ItemStack(ModItems.ingot_raw, 1, Mats.MAT_SLAG.id)
                 ));
 
-        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_limonite")
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_limonite_1")
                 .setDuration(800)
                 .inputItems(
-                        new SlagStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.LIMONITE_SLAG, 1), 100),
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.LIMONITE_SLAG, 1), 100),
                         new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 1)
                 )
                 .outputItems(
-                        new ItemStack((Item.getByNameOrId("tfc:metal/ingot/pig_iron")), 1),
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 1),
                         new ItemStack(ModItems.ingot_raw, 1, Mats.MAT_SLAG.id)
+                ));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_hematite_2")
+                .setDuration(1400)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.HEMATITE_SLAG, 1), 200),
+                        new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 2)
+                )
+                .outputItems(
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 2),
+                        new ItemStack(ModItems.ingot_raw, 2, Mats.MAT_SLAG.id)
+                ));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_magnetite_2")
+                .setDuration(1400)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.MAGNETITE_SLAG, 1), 200),
+                        new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 2)
+                )
+                .outputItems(
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 2),
+                        new ItemStack(ModItems.ingot_raw, 2, Mats.MAT_SLAG.id)
+                ));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_limonite_2")
+                .setDuration(1400)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.LIMONITE_SLAG, 1), 200),
+                        new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 2)
+                )
+                .outputItems(
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 2),
+                        new ItemStack(ModItems.ingot_raw, 2, Mats.MAT_SLAG.id)
+                ));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_hematite_3")
+                .setDuration(2000)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.HEMATITE_SLAG, 1), 300),
+                        new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 3)
+                )
+                .outputItems(
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 3),
+                        new ItemStack(ModItems.ingot_raw, 3, Mats.MAT_SLAG.id)
+                ));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_magnetite_3")
+                .setDuration(2000)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.MAGNETITE_SLAG, 1), 300),
+                        new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 3)
+                )
+                .outputItems(
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 3),
+                        new ItemStack(ModItems.ingot_raw, 3, Mats.MAT_SLAG.id)
+                ));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_limonite_3")
+                .setDuration(2000)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.LIMONITE_SLAG, 1), 300),
+                        new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 3)
+                )
+                .outputItems(
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 3),
+                        new ItemStack(ModItems.ingot_raw, 3, Mats.MAT_SLAG.id)
+                ));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_hematite_4")
+                .setDuration(2600)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.HEMATITE_SLAG, 1), 400),
+                        new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 4)
+                )
+                .outputItems(
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 4),
+                        new ItemStack(ModItems.ingot_raw, 4, Mats.MAT_SLAG.id)
+                ));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_magnetite_4")
+                .setDuration(2600)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.MAGNETITE_SLAG, 1), 400),
+                        new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 4)
+                )
+                .outputItems(
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 4),
+                        new ItemStack(ModItems.ingot_raw, 4, Mats.MAT_SLAG.id)
+                ));
+
+        instance.register((BlastFurnaceRecipe) new BlastFurnaceRecipe("blast.pig_iron_limonite_4")
+                .setDuration(2600)
+                .inputItems(
+                        new SlagAStack(new ItemStack(com.voided.tfcnuclear.inventory.items.ModItems.LIMONITE_SLAG, 1), 400),
+                        new RecipesCommon.ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 4)
+                )
+                .outputItems(
+                        new ItemStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 4),
+                        new ItemStack(ModItems.ingot_raw, 4, Mats.MAT_SLAG.id)
                 ));
     }
 
-    /**
-     * Вспомогательный метод для создания крицы с нужным количеством через Capability
-     */
     private ItemStack createBloomWithAmount(String itemId, int amount) {
         ItemStack stack = new ItemStack(Item.getByNameOrId(itemId), 1);
         net.dries007.tfc.api.capability.forge.IForgeableMeasurableMetal cap =

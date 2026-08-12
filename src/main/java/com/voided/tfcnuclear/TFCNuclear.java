@@ -1,19 +1,22 @@
 package com.voided.tfcnuclear;
 
-import com.hbm.api.fluidmk2.IFluidRegisterListener;
-import com.hbm.inventory.fluid.FluidType;
-import com.hbm.inventory.fluid.Fluids;
-import com.hbm.render.misc.EnumSymbol;
 import com.voided.tfcnuclear.compat.tfc.ConfigOverwriteHandler;
 import com.voided.tfcnuclear.compat.hbm.ItemRenamer;
+import com.voided.tfcnuclear.compat.tfc.NetherPortalHandler;
 import com.voided.tfcnuclear.inventory.fluids.TFCNuclearFluids;
 import com.voided.tfcnuclear.inventory.handler.*;
-import com.voided.tfcnuclear.inventory.recipes.*;
+import com.voided.tfcnuclear.inventory.items.CobaltMetalRegistration;
+import com.voided.tfcnuclear.inventory.items.ModItems;
+import com.voided.tfcnuclear.inventory.material.TFCNuclearMaterialShapes;
+import com.voided.tfcnuclear.inventory.material.TFCNuclearMoldIntegration;
 import com.voided.tfcnuclear.inventory.material.TFCNuclearMats;
+import com.voided.tfcnuclear.inventory.recipes.tfc.TFCQuernRecipes;
+import com.voided.tfcnuclear.inventory.recipes.vanilla.*;
 import com.voided.tfcnuclear.proxy.CommonProxy;
 import com.voided.tfcnuclear.world.OreSpawn.HBMOreSpawn;
 import com.voided.tfcnuclear.world.OreSpawn.TFCOreSpawn;
 import net.dries007.tfc.api.recipes.heat.HeatRecipe;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -22,97 +25,65 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
+import java.util.logging.Logger;
 
 @Mod(modid = TFCNuclear.MOD_ID,
         name = TFCNuclear.NAME,
-        version = TFCNuclear.VERSION)
+        version = TFCNuclear.VERSION,
+        dependencies = "required-after:hbm;required-after:tfc")
 public class TFCNuclear {
     public static final String MOD_ID = "tfcnuclear";
     public static final String NAME = "TFC Nuclear Tech Addon";
-    public static final String VERSION = "1.0.1";
+    public static final String VERSION = "2.0.0";
 
+    @Mod.Instance
+    public static TFCNuclear instance;
 
-    @SidedProxy(clientSide = "com.voided.tfcnuclear.proxy.ClientProxy", serverSide = "com.voided.tfcnuclear.proxy.CommonProxy")
+    public static final SimpleNetworkWrapper NETWORK =
+            NetworkRegistry.INSTANCE.newSimpleChannel(MOD_ID);
+
+    @SidedProxy(clientSide = "com.voided.tfcnuclear.proxy.ClientProxy",
+            serverSide = "com.voided.tfcnuclear.proxy.CommonProxy")
     public static CommonProxy proxy;
+    public static Logger logger;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-                TFCNuclearFluids.writeFluidToConfig();
-            } catch (InterruptedException ignored) {}
-        }).start();
-
+        CobaltMetalRegistration.registerCobaltMetal();
+        OreDictHandler.registerOreDict();
+        TFCNuclearMaterialShapes.registerShapes();
+        OreDictHandler.registerOreDict();
         TFCNuclearMats.init();
-
-        proxy.registerModels();
+        TFCNuclearMoldIntegration.integrateMolds();
+        proxy.preInit(event);
+        OreDictHandler.registerOreDict();
+        ItemSizeRegistry.registerSizes();
         HBMOreSpawn.generate(event);
         TFCOreSpawn.generate(event);
         TFCOreSpawn.clean(event);
-
-
-        OreDictHandler.registerOreDict();
-        new Thread(() -> {
-            try {
-                Thread.sleep(4000); // 5 секунд задержки
-                ConfigOverwriteHandler.applyConfigOverwrites();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        TFCNuclearFluids.writeFluidToConfig();
+        ConfigOverwriteHandler.applyConfigOverwrites();
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-
-        SmeltingRemover.removeRecipes();
-
-        OreDictHandler.registerOreDict();
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(2000);
-                TFCOreDictCleaner.cleanOreDict();
-                HBMOreDictCleaner.cleanOreDict();
-                VanillaOreDictCleaner.cleanOreDict();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
-
         MinecraftForge.EVENT_BUS.register(new ItemRenamer());
-
-
-        CraftingRecipes.addRecipes();
-        FurnaceRecipes.addRecipes();
+        MinecraftForge.EVENT_BUS.register(new NetherPortalHandler());
         TFCQuernRecipes.addQuernRecipe();
+        CraftingRecipesRegistry.addRecipes();
+        FurnaceRecipesRegistry.addRecipes();
+        SmeltingRecipeRemover.remove();
+        HammerRecipesRegistry.register();
+        OreDictHandler.registerOreDict();
+        ModItems.registerOreDict();
+        OreDictCleaner.cleanOreDict();
     }
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(2000);
-                TFCOreDictCleaner.cleanOreDict();
-                HBMOreDictCleaner.cleanOreDict();
-                VanillaOreDictCleaner.cleanOreDict();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
-
-        FurnaceRecipes.addRecipes();
-    }
-
-    @Mod.EventBusSubscriber(modid = MOD_ID)
-    public static class RegistryEvents {
-        @SubscribeEvent
-        public static void onHeatRegistry(RegistryEvent.Register<HeatRecipe> event) {
-            TFCHeatRecipes.registerHeatRecipes(event);
-        }
+        OreDictHandler.registerOreDict();
     }
 }

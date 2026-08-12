@@ -44,6 +44,10 @@ dependencies {
     implementation rfg.deobf("curse.maven:jei-238222:5846804")
     implementation rfg.deobf("maven.modrinth:terrafirmacraft:1.7.23.181")
 
+    compileOnly rfg.deobf(files("libs/tfcambiental-1.1.0.jar"))
+    compileOnly rfg.deobf(files("libs/NTM-Space-1.12.2-0.9.2.jar"))
+
+
 
 
     // Example - Dependency descriptor:

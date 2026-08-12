@@ -16,7 +16,6 @@ public class MixinBloomeryRecipes {
 
         String itemName = stack.getItem().getRegistryName().toString();
 
-        // Запрещаем только входные предметы
         if (itemName.contains("wrought") || itemName.contains("bloom") || itemName.contains("bars")) {
             cir.setReturnValue(false);
         }

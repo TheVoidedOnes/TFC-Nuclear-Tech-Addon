@@ -1,8 +1,10 @@
 package com.voided.tfcnuclear.overwrite_contents.mixin.recipes;
 
+import com.hbm.inventory.RecipesCommon;
 import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.inventory.recipes.ArcWelderRecipes;
 import com.hbm.inventory.recipes.ArcWelderRecipes.ArcWelderRecipe;
+import com.hbm.items.ModItems;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,13 +23,13 @@ public class MixinArcWelderRecipes {
 
     @Inject(method = "registerDefaults", at = @At("TAIL"), remap = false)
     public void addCustomRecipes(CallbackInfo ci) {
-
         String[] metals = {
                 "bismuth", "bismuth_bronze", "black_bronze", "black_steel", "blue_steel",
                 "brass", "bronze", "gold", "nickel", "pig_iron",
                 "platinum", "red_steel", "rose_gold", "silver", "sterling_silver",
-                "tin", "weak_blue_steel", "weak_red_steel", "weak_steel", "wrought_iron", "zinc"
+                "tin", "weak_blue_steel", "weak_red_steel", "weak_steel", "wrought_iron"
         };
+
         for (String metal : metals) {
             Item doubleIngot = Item.getByNameOrId("tfc:metal/double_ingot/" + metal);
             Item ingot = Item.getByNameOrId("tfc:metal/ingot/" + metal);
@@ -41,6 +43,7 @@ public class MixinArcWelderRecipes {
                 ));
             }
         }
+
         for (String metal : metals) {
             Item doubleSheet = Item.getByNameOrId("tfc:metal/double_sheet/" + metal);
             Item sheet = Item.getByNameOrId("tfc:metal/sheet/" + metal);
@@ -54,6 +57,7 @@ public class MixinArcWelderRecipes {
                 ));
             }
         }
+
         for (String metal : metals) {
             Item doubleIngot = Item.getByNameOrId("tfc:metal/double_ingot/" + metal);
             Item sheet = Item.getByNameOrId("tfc:metal/sheet/" + metal);
@@ -67,6 +71,7 @@ public class MixinArcWelderRecipes {
                 ));
             }
         }
+
         for (String metal : metals) {
             Item sheet = Item.getByNameOrId("tfc:metal/sheet/" + metal);
             Item doubleSheet = Item.getByNameOrId("tfc:metal/double_sheet/" + metal);
@@ -80,6 +85,7 @@ public class MixinArcWelderRecipes {
                 ));
             }
         }
+
         for (String metal : metals) {
             Item ingot = Item.getByNameOrId("tfc:metal/ingot/" + metal);
             Item doubleIngot = Item.getByNameOrId("tfc:metal/double_ingot/" + metal);
@@ -93,6 +99,7 @@ public class MixinArcWelderRecipes {
                 ));
             }
         }
+
         for (String metal : metals) {
             Item doubleSheet = Item.getByNameOrId("tfc:metal/double_sheet/" + metal);
             Item tuyere = Item.getByNameOrId("tfc:metal/tuyere/" + metal);
@@ -106,72 +113,84 @@ public class MixinArcWelderRecipes {
                 ));
             }
         }
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/tuyere/steel"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("tfc:metal/double_sheet/steel"), 1)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/tuyere/copper"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("tfc:metal/double_sheet/copper"), 1)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/double_ingot/steel"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("hbm:ingot_steel"), 2)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/double_ingot/lead"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("hbm:ingot_lead"), 2)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/double_ingot/copper"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("hbm:ingot_copper"), 2)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/double_sheet/steel"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("tfc:metal/sheet/steel"), 2)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/double_sheet/lead"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("tfc:metal/sheet/lead"), 2)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/double_sheet/copper"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("tfc:metal/sheet/copper"), 2)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/sheet/steel"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("tfc:metal/double_ingot/steel"), 2)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/sheet/lead"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("tfc:metal/double_ingot/lead"), 2)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/sheet/copper"), 1),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("tfc:metal/double_ingot/copper"), 2)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/ingot/high_carbon_black_steel"), 1),
                 100,
@@ -180,18 +199,21 @@ public class MixinArcWelderRecipes {
                 new ComparableStack(Item.getByNameOrId("tfc:metal/ingot/pig_iron"), 1),
                 new ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 1)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("minecraft:iron_bars"), 8),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("tfc:metal/sheet/wrought_iron"), 1)
         ));
+
         recipes.add(new ArcWelderRecipe(
-                new ItemStack(Item.getByNameOrId("minecraft:iron_bars"),16),
+                new ItemStack(Item.getByNameOrId("minecraft:iron_bars"), 16),
                 100,
                 150,
                 new ComparableStack(Item.getByNameOrId("tfc:metal/double_sheet/wrought_iron"), 1)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/ingot/high_carbon_red_steel"), 1),
                 100,
@@ -200,6 +222,7 @@ public class MixinArcWelderRecipes {
                 new ComparableStack(Item.getByNameOrId("tfc:metal/ingot/black_steel"), 1),
                 new ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 1)
         ));
+
         recipes.add(new ArcWelderRecipe(
                 new ItemStack(Item.getByNameOrId("tfc:metal/ingot/high_carbon_blue_steel"), 1),
                 100,
@@ -207,6 +230,55 @@ public class MixinArcWelderRecipes {
                 new ComparableStack(Item.getByNameOrId("tfc:metal/ingot/weak_blue_steel"), 1),
                 new ComparableStack(Item.getByNameOrId("tfc:metal/ingot/black_steel"), 1),
                 new ComparableStack(Item.getByNameOrId("hbm:powder_flux"), 1)
+        ));
+
+        recipes.add(new ArcWelderRecipe(
+                new ItemStack(Item.getByNameOrId("tfc:metal/double_ingot/zinc"), 1),
+                100,
+                150L,
+                new RecipesCommon.OreDictStack("ingotZinc", 2)
+        ));
+
+        recipes.add(new ArcWelderRecipe(
+                new ItemStack(Item.getByNameOrId("tfc:metal/sheet/zinc"), 1),
+                100,
+                150L,
+                new RecipesCommon.OreDictStack("ingotDoubleZinc", 1)
+        ));
+
+        recipes.add(new ArcWelderRecipe(
+                new ItemStack(Item.getByNameOrId("tfc:metal/sheet/zinc"), 2),
+                100,
+                150L,
+                new RecipesCommon.OreDictStack("sheetDoubleZinc", 1)
+        ));
+
+        recipes.add(new ArcWelderRecipe(
+                new ItemStack(Item.getByNameOrId("tfc:metal/double_sheet/zinc"), 1),
+                100,
+                150L,
+                new RecipesCommon.OreDictStack("sheetZinc", 2)
+        ));
+
+        recipes.add(new ArcWelderRecipe(
+                new ItemStack(Item.getByNameOrId("tfc:metal/steel/rod"), 2),
+                100,
+                150L,
+                new RecipesCommon.ComparableStack(ModItems.ingot_steel, 1)
+        ));
+
+        recipes.add(new ArcWelderRecipe(
+                new ItemStack(Item.getByNameOrId("tfc:metal/steel/gold"), 2),
+                100,
+                150L,
+                new RecipesCommon.ComparableStack(Item.getByNameOrId("tfc:metal/ingot/gold"), 1)
+        ));
+
+        recipes.add(new ArcWelderRecipe(
+                new ItemStack(Item.getByNameOrId("tfc:metal/steel/wrought_iron"), 2),
+                100,
+                150L,
+                new RecipesCommon.ComparableStack(Item.getByNameOrId("tfc:metal/ingot/wrought_iron"), 1)
         ));
     }
 }

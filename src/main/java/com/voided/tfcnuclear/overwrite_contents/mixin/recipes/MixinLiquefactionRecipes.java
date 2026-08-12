@@ -34,30 +34,6 @@ public class MixinLiquefactionRecipes {
     private static void removeRecipeByInput(RecipesCommon.ComparableStack input) {
         if (recipes.containsKey(input)) {
             recipes.remove(input);
-            System.out.println("[TFC-Nuclear] Removed liquefaction recipe for: " + input.item.getRegistryName());
-        } else {
-            System.out.println("[TFC-Nuclear] Liquefaction recipe not found for: " + input.item.getRegistryName());
-        }
-    }
-
-    /**
-     * Удаляет рецепт по OreDict (удаляет все рецепты с этим ключом)
-     */
-    private static void removeRecipeByOreDict(String oreDictName) {
-        if (recipes.containsKey(oreDictName)) {
-            recipes.remove(oreDictName);
-            System.out.println("[TFC-Nuclear] Removed liquefaction recipe for OreDict: " + oreDictName);
-        } else {
-            System.out.println("[TFC-Nuclear] Liquefaction recipe not found for OreDict: " + oreDictName);
-        }
-    }
-
-    /**
-     * Удаляет рецепт по OreDict (перегрузка для String)
-     */
-    private static void removeRecipeByOreDict(String[] oreDictNames) {
-        for (String name : oreDictNames) {
-            removeRecipeByOreDict(name);
         }
     }
 }

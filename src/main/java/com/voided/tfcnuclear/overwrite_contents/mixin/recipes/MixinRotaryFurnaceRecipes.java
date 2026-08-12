@@ -25,7 +25,6 @@ public class MixinRotaryFurnaceRecipes {
     @Inject(method = "registerDefaults", at = @At("TAIL"), remap = false)
     public void modifyRecipes(CallbackInfo ci) {
         removeSteelRecipes();
-        addCustomRecipes();
     }
 
     private void removeSteelRecipes() {
@@ -39,21 +38,6 @@ public class MixinRotaryFurnaceRecipes {
 
         int removed = before - recipes.size();
         if (removed > 0) {
-            System.out.println("[MixinRotaryFurnaceRecipes] Removed " + removed + " steel recipes");
         }
-    }
-
-    private void addCustomRecipes() {
-        if (recipes == null) return;
-
-        // Добавляем все те же рецепты...
-        recipes.add(new RotaryFurnaceRecipe(
-                new Mats.MaterialStack(MAT_WROUGHTIRON, INGOT.q(1)),
-                80, 100,
-                new RecipesCommon.OreDictStack("ingotPigIron", 1),
-                new RecipesCommon.ComparableStack(ModItems.powder_flux, 1)
-        ));
-
-        // ... и так далее, как в предыдущем варианте
     }
 }

@@ -4,6 +4,7 @@ import com.hbm.inventory.RecipesCommon;
 import com.hbm.inventory.material.MatDistribution;
 import com.hbm.inventory.material.Mats;
 import com.hbm.items.ModItems;
+import com.voided.tfcnuclear.compat.hbmspace.MatZincProvider;
 import com.voided.tfcnuclear.inventory.material.TFCNuclearMats;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -32,9 +33,7 @@ public class MixinMatDistributionRecipes {
     private static final String[] ORES_TO_REMOVE = {
             "oreIron", "oreGold", "oreCoal", "oreRedstone",
             "oreCopper", "oreAluminum", "oreLead",
-            "oreHematite", "oreMalachite",
-            "oreTitanium", "oreTungsten", "oreUranium",
-            "oreThorium", "oreBeryllium", "oreCobalt"
+            "oreHematite", "oreMalachite"
     };
 
     @Inject(method = "registerDefaults", at = @At("RETURN"))
@@ -43,7 +42,6 @@ public class MixinMatDistributionRecipes {
             return;
         }
 
-        // Удаляем предметы из materialEntries
         removeItemRecipes(
                 new ItemStack(Items.MINECART),
                 new ItemStack(Item.getByNameOrId("hbm:stamp_iron_flat")),
@@ -53,18 +51,13 @@ public class MixinMatDistributionRecipes {
                 new ItemStack(ModItems.stamp_iron_flat)
         );
 
-        // Удаляем рудные рецепты из materialOreEntries
         removeDefaultOreRecipes();
 
-        // Добавляем TFC рецепты
         addTFCOreRecipes();
         addBloomRecipe();
         addTFCMetalRecipes();
     }
 
-    /**
-     * Удаление рецептов по ItemStack с полной очисткой
-     */
     private void removeItemRecipes(ItemStack... stacksToRemove) {
         try {
             Field materialEntriesField = Mats.class.getDeclaredField("materialEntries");
@@ -74,17 +67,14 @@ public class MixinMatDistributionRecipes {
 
             if (materialEntries == null) return;
 
-            // Создаем список для удаления
             List<RecipesCommon.ComparableStack> toRemove = new ArrayList<>();
 
             for (Map.Entry<RecipesCommon.ComparableStack, List<Mats.MaterialStack>> entry : materialEntries.entrySet()) {
                 RecipesCommon.ComparableStack currentStack = entry.getKey();
 
-                // Проверяем каждый предмет из списка на удаление
                 for (ItemStack targetStack : stacksToRemove) {
                     if (targetStack == null || targetStack.getItem() == null) continue;
 
-                    // Сравниваем по item и мета-данным (без NBT)
                     if (currentStack.item == targetStack.getItem() &&
                             currentStack.meta == targetStack.getItemDamage()) {
                         toRemove.add(currentStack);
@@ -93,14 +83,11 @@ public class MixinMatDistributionRecipes {
                 }
             }
 
-            // Удаляем все найденные рецепты
             for (RecipesCommon.ComparableStack stack : toRemove) {
                 materialEntries.remove(stack);
-                System.out.println("[TFC Nuclear] Removed recipe for: " + stack.item.getRegistryName());
             }
 
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            System.err.println("[TFC Nuclear] Failed to remove item recipes: " + e.getMessage());
         }
     }
 
@@ -113,13 +100,11 @@ public class MixinMatDistributionRecipes {
 
             if (materialOreEntries == null) return;
 
-            // Создаем список ключей для удаления
             List<String> toRemove = new ArrayList<>();
 
             for (Map.Entry<String, List<Mats.MaterialStack>> entry : materialOreEntries.entrySet()) {
                 String key = entry.getKey();
 
-                // Проверяем все ключи на удаление
                 for (String targetKey : ORES_TO_REMOVE) {
                     if (key.equals(targetKey) || key.startsWith(targetKey)) {
                         toRemove.add(key);
@@ -128,21 +113,15 @@ public class MixinMatDistributionRecipes {
                 }
             }
 
-            // Удаляем все найденные рецепты
             for (String key : toRemove) {
                 materialOreEntries.remove(key);
-                System.out.println("[TFC Nuclear] Removed ore recipe for: " + key);
             }
 
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            System.err.println("[TFC Nuclear] Failed to remove ore recipes: " + e.getMessage());
         }
     }
 
-    // ========== Рецепты для TFC руд ==========
-
     private void addTFCOreRecipes() {
-        // Ваши рецепты остаются без изменений
         MatDistribution.registerOre("oreNormalHematite", MAT_HEMATITE, QUANTUM.q(18));
         MatDistribution.registerOre("oreRichHematite", MAT_HEMATITE, QUANTUM.q(26));
         MatDistribution.registerOre("orePoorHematite", MAT_HEMATITE, QUANTUM.q(12));
@@ -173,15 +152,10 @@ public class MixinMatDistributionRecipes {
         MatDistribution.registerOre("orePoorGalena", MAT_LEAD, QUANTUM.q(12));
         MatDistribution.registerOre("oreSmallGalena", MAT_LEAD, QUANTUM.q(8));
 
-        MatDistribution.registerOre("oreNormalSphalerite", TFCNuclearMats.MAT_ZINC, QUANTUM.q(18));
-        MatDistribution.registerOre("oreRichSphalerite", TFCNuclearMats.MAT_ZINC, QUANTUM.q(26));
-        MatDistribution.registerOre("orePoorSphalerite", TFCNuclearMats.MAT_ZINC, QUANTUM.q(12));
-        MatDistribution.registerOre("oreSmallSphalerite", TFCNuclearMats.MAT_ZINC, QUANTUM.q(8));
-
-        MatDistribution.registerOre("oreNormalGarnierite", TFCNuclearMats.MAT_NICKEL, QUANTUM.q(18));
-        MatDistribution.registerOre("oreRichGarnierite", TFCNuclearMats.MAT_NICKEL, QUANTUM.q(26));
-        MatDistribution.registerOre("orePoorGarnierite", TFCNuclearMats.MAT_NICKEL, QUANTUM.q(12));
-        MatDistribution.registerOre("oreSmallGarnierite", TFCNuclearMats.MAT_NICKEL, QUANTUM.q(8));
+        MatDistribution.registerOre("oreNormalChromite", TFCNuclearMats.MAT_CHROME, QUANTUM.q(18));
+        MatDistribution.registerOre("oreRichChromite", TFCNuclearMats.MAT_CHROME, QUANTUM.q(26));
+        MatDistribution.registerOre("orePoorChromite", TFCNuclearMats.MAT_CHROME, QUANTUM.q(12));
+        MatDistribution.registerOre("oreSmallChromite", TFCNuclearMats.MAT_CHROME, QUANTUM.q(8));
 
         MatDistribution.registerOre("oreNormalTetrahedrite", MAT_COPPER, QUANTUM.q(18));
         MatDistribution.registerOre("oreRichTetrahedrite", MAT_COPPER, QUANTUM.q(26));
@@ -213,9 +187,35 @@ public class MixinMatDistributionRecipes {
         MatDistribution.registerOre("orePoorMolybdenum", TFCNuclearMats.MAT_MOLYBDENUM, QUANTUM.q(12));
         MatDistribution.registerOre("oreSmallMolybdenum", TFCNuclearMats.MAT_MOLYBDENUM, QUANTUM.q(8));
 
-        MatDistribution.registerOre("tfcCryolite", MAT_ALUMINIUM, QUANTUM.q(72), MAT_SODIUM, NUGGET.q(3), MAT_STONE, INGOT.q(1));
-        MatDistribution.registerOre("tfcCoal", MAT_CARBON, INGOT.q(3), MAT_STONE, INGOT.q(1));
-        MatDistribution.registerOre("tfcRedstone", MAT_REDSTONE, INGOT.q(4), MAT_STONE, INGOT.q(1));
+        MatDistribution.registerOre("oreCryoliteTFC", MAT_ALUMINIUM, QUANTUM.q(72), MAT_SODIUM, NUGGET.q(3), MAT_STONE, INGOT.q(1));
+        MatDistribution.registerOre("oreBituminousCoal", MAT_CARBON, INGOT.q(3), MAT_STONE, INGOT.q(1));
+        MatDistribution.registerOre("oreRedstoneTFC", MAT_REDSTONE, INGOT.q(4), MAT_STONE, INGOT.q(1));
+
+        MatDistribution.registerEntry(com.voided.tfcnuclear.inventory.items.ModItems.CRYSTAL_APATITE, TFCNuclearMats.MAT_APATITE, INGOT.q(2));
+
+        Object zincMaterial;
+
+        if (MatZincProvider.isSpaceMatZincAvailable()) {
+            zincMaterial = MatZincProvider.getMatZinc();
+
+            MatDistribution.registerOre("oreNormalSphalerite", zincMaterial, QUANTUM.q(18));
+            MatDistribution.registerOre("oreRichSphalerite", zincMaterial, QUANTUM.q(26));
+            MatDistribution.registerOre("orePoorSphalerite", zincMaterial, QUANTUM.q(12));
+            MatDistribution.registerOre("oreSmallSphalerite", zincMaterial, QUANTUM.q(8));
+            MatDistribution.registerOre("ingotDoubleZinc", zincMaterial, QUANTUM.q(144));
+            MatDistribution.registerOre("sheetDoubleZinc", zincMaterial, QUANTUM.q(288));
+            MatDistribution.registerOre("sheetZinc", zincMaterial, QUANTUM.q(144));
+            MatDistribution.registerOre("scrapZinc", zincMaterial, QUANTUM.q(72));
+        } else {
+            MatDistribution.registerOre("oreNormalSphalerite", TFCNuclearMats.MAT_ZINC, QUANTUM.q(18));
+            MatDistribution.registerOre("oreRichSphalerite", TFCNuclearMats.MAT_ZINC, QUANTUM.q(26));
+            MatDistribution.registerOre("orePoorSphalerite", TFCNuclearMats.MAT_ZINC, QUANTUM.q(12));
+            MatDistribution.registerOre("oreSmallSphalerite", TFCNuclearMats.MAT_ZINC, QUANTUM.q(8));
+            MatDistribution.registerOre("ingotDoubleZinc", TFCNuclearMats.MAT_ZINC, QUANTUM.q(144));
+            MatDistribution.registerOre("sheetDoubleZinc", TFCNuclearMats.MAT_ZINC, QUANTUM.q(288));
+            MatDistribution.registerOre("sheetZinc", TFCNuclearMats.MAT_ZINC, QUANTUM.q(144));
+            MatDistribution.registerOre("scrapZinc", TFCNuclearMats.MAT_ZINC, QUANTUM.q(72));
+        }
     }
 
     private void addBloomRecipe() {
@@ -226,9 +226,9 @@ public class MixinMatDistributionRecipes {
                 bloomItem,
                 MAT_WROUGHTIRON, QUANTUM.q(72)
         );
-    }
 
-    // ========== Рецепты для TFC металлов ==========
+        MatDistribution.registerEntry(Item.getByNameOrId("hbm:stamp_iron_flat"), MAT_WROUGHTIRON, INGOT.q(4));
+    }
 
     private void addTFCMetalRecipes() {
         MatDistribution.registerOre("ingotDoubleBismuth", TFCNuclearMats.MAT_MOLYBDENUM, QUANTUM.q(144));
@@ -239,11 +239,10 @@ public class MixinMatDistributionRecipes {
         MatDistribution.registerOre("ingotDoubleCopper", MAT_COPPER, QUANTUM.q(144));
         MatDistribution.registerOre("ingotDoubleGold", MAT_GOLD, QUANTUM.q(144));
         MatDistribution.registerOre("ingotDoubleLead", MAT_LEAD, QUANTUM.q(144));
-        MatDistribution.registerOre("ingotDoubleNickel", TFCNuclearMats.MAT_NICKEL, QUANTUM.q(144));
+        MatDistribution.registerOre("ingotDoubleChrome", TFCNuclearMats.MAT_CHROME, QUANTUM.q(144));
         MatDistribution.registerOre("ingotDoubleRoseGold", TFCNuclearMats.MAT_ROSEGOLD, QUANTUM.q(144));
         MatDistribution.registerOre("ingotDoubleSilver", TFCNuclearMats.MAT_SILVER, QUANTUM.q(144));
         MatDistribution.registerOre("ingotDoubleTin", TFCNuclearMats.MAT_TIN, QUANTUM.q(144));
-        MatDistribution.registerOre("ingotDoubleZinc", TFCNuclearMats.MAT_ZINC, QUANTUM.q(144));
         MatDistribution.registerOre("ingotDoubleSterlingSilver", TFCNuclearMats.MAT_STERLINGSILVER, QUANTUM.q(144));
         MatDistribution.registerOre("ingotDoubleWroughtIron", MAT_WROUGHTIRON, QUANTUM.q(144));
         MatDistribution.registerOre("ingotDoublePigIron", MAT_PIGIRON, QUANTUM.q(144));
@@ -253,7 +252,6 @@ public class MixinMatDistributionRecipes {
         MatDistribution.registerOre("ingotDoubleBlueSteel", TFCNuclearMats.MAT_BLUESTEEL, QUANTUM.q(144));
         MatDistribution.registerOre("ingotDoubleRedSteel", TFCNuclearMats.MAT_REDSTEEL, QUANTUM.q(144));
 
-        // Double Sheets
         MatDistribution.registerOre("sheetDoubleBismuth", TFCNuclearMats.MAT_MOLYBDENUM, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoubleBismuthBronze", TFCNuclearMats.MAT_ELASTICCOPPER, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoubleBlackBronze", TFCNuclearMats.MAT_BLACKBRONZE, QUANTUM.q(288));
@@ -262,11 +260,10 @@ public class MixinMatDistributionRecipes {
         MatDistribution.registerOre("sheetDoubleCopper", MAT_COPPER, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoubleGold", MAT_GOLD, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoubleLead", MAT_LEAD, QUANTUM.q(288));
-        MatDistribution.registerOre("sheetDoubleNickel", TFCNuclearMats.MAT_NICKEL, QUANTUM.q(288));
+        MatDistribution.registerOre("sheetDoubleChrome", TFCNuclearMats.MAT_CHROME, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoubleRoseGold", TFCNuclearMats.MAT_ROSEGOLD, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoubleSilver", TFCNuclearMats.MAT_SILVER, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoubleTin", TFCNuclearMats.MAT_TIN, QUANTUM.q(288));
-        MatDistribution.registerOre("sheetDoubleZinc", TFCNuclearMats.MAT_ZINC, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoubleSterlingSilver", TFCNuclearMats.MAT_STERLINGSILVER, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoubleWroughtIron", MAT_WROUGHTIRON, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoublePigIron", MAT_PIGIRON, QUANTUM.q(288));
@@ -276,7 +273,6 @@ public class MixinMatDistributionRecipes {
         MatDistribution.registerOre("sheetDoubleBlueSteel", TFCNuclearMats.MAT_BLUESTEEL, QUANTUM.q(288));
         MatDistribution.registerOre("sheetDoubleRedSteel", TFCNuclearMats.MAT_REDSTEEL, QUANTUM.q(288));
 
-        // Sheets
         MatDistribution.registerOre("sheetBismuth", TFCNuclearMats.MAT_MOLYBDENUM, QUANTUM.q(144));
         MatDistribution.registerOre("sheetBismuthBronze", TFCNuclearMats.MAT_ELASTICCOPPER, QUANTUM.q(144));
         MatDistribution.registerOre("sheetBlackBronze", TFCNuclearMats.MAT_BLACKBRONZE, QUANTUM.q(144));
@@ -285,11 +281,10 @@ public class MixinMatDistributionRecipes {
         MatDistribution.registerOre("sheetCopper", MAT_COPPER, QUANTUM.q(144));
         MatDistribution.registerOre("sheetGold", MAT_GOLD, QUANTUM.q(144));
         MatDistribution.registerOre("sheetLead", MAT_LEAD, QUANTUM.q(144));
-        MatDistribution.registerOre("sheetNickel", TFCNuclearMats.MAT_NICKEL, QUANTUM.q(144));
+        MatDistribution.registerOre("sheetChrome", TFCNuclearMats.MAT_CHROME, QUANTUM.q(144));
         MatDistribution.registerOre("sheetRoseGold", TFCNuclearMats.MAT_ROSEGOLD, QUANTUM.q(144));
         MatDistribution.registerOre("sheetSilver", TFCNuclearMats.MAT_SILVER, QUANTUM.q(144));
         MatDistribution.registerOre("sheetTin", TFCNuclearMats.MAT_TIN, QUANTUM.q(144));
-        MatDistribution.registerOre("sheetZinc", TFCNuclearMats.MAT_ZINC, QUANTUM.q(144));
         MatDistribution.registerOre("sheetSterlingSilver", TFCNuclearMats.MAT_STERLINGSILVER, QUANTUM.q(144));
         MatDistribution.registerOre("sheetWroughtIron", MAT_WROUGHTIRON, QUANTUM.q(144));
         MatDistribution.registerOre("sheetPigIron", MAT_PIGIRON, QUANTUM.q(144));
@@ -299,7 +294,6 @@ public class MixinMatDistributionRecipes {
         MatDistribution.registerOre("sheetBlueSteel", TFCNuclearMats.MAT_BLUESTEEL, QUANTUM.q(144));
         MatDistribution.registerOre("sheetRedSteel", TFCNuclearMats.MAT_REDSTEEL, QUANTUM.q(144));
 
-        // Scrap
         MatDistribution.registerOre("scrapBismuth", TFCNuclearMats.MAT_MOLYBDENUM, QUANTUM.q(72));
         MatDistribution.registerOre("scrapBismuthBronze", TFCNuclearMats.MAT_ELASTICCOPPER, QUANTUM.q(72));
         MatDistribution.registerOre("scrapBlackBronze", TFCNuclearMats.MAT_BLACKBRONZE, QUANTUM.q(72));
@@ -308,11 +302,10 @@ public class MixinMatDistributionRecipes {
         MatDistribution.registerOre("scrapCopper", MAT_COPPER, QUANTUM.q(72));
         MatDistribution.registerOre("scrapGold", MAT_GOLD, QUANTUM.q(72));
         MatDistribution.registerOre("scrapLead", MAT_LEAD, QUANTUM.q(72));
-        MatDistribution.registerOre("scrapNickel", TFCNuclearMats.MAT_NICKEL, QUANTUM.q(72));
+        MatDistribution.registerOre("scrapChrome", TFCNuclearMats.MAT_CHROME, QUANTUM.q(72));
         MatDistribution.registerOre("scrapRoseGold", TFCNuclearMats.MAT_ROSEGOLD, QUANTUM.q(72));
         MatDistribution.registerOre("scrapSilver", TFCNuclearMats.MAT_SILVER, QUANTUM.q(72));
         MatDistribution.registerOre("scrapTin", TFCNuclearMats.MAT_TIN, QUANTUM.q(72));
-        MatDistribution.registerOre("scrapZinc", TFCNuclearMats.MAT_ZINC, QUANTUM.q(72));
         MatDistribution.registerOre("scrapSterlingSilver", TFCNuclearMats.MAT_STERLINGSILVER, QUANTUM.q(72));
         MatDistribution.registerOre("scrapWroughtIron", MAT_WROUGHTIRON, QUANTUM.q(72));
         MatDistribution.registerOre("scrapPigIron", MAT_PIGIRON, QUANTUM.q(72));

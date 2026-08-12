@@ -24,29 +24,21 @@ public class MixinItemSize {
     @Shadow
     private boolean canStack;
 
-    /**
-     * Переопределяем getSize для блоков HBM
-     */
     @Inject(method = "getSize", at = @At("HEAD"), cancellable = true, remap = false)
     public void onGetSize(ItemStack stack, CallbackInfoReturnable<Size> cir) {
         if (stack == null || stack.isEmpty()) return;
 
-        // Проверяем, является ли предмет блоком
         if (stack.getItem() instanceof ItemBlock) {
             ItemBlock itemBlock = (ItemBlock) stack.getItem();
             Block block = itemBlock.getBlock();
             String blockName = block.getRegistryName().toString();
 
-            // Для всех блоков HBM устанавливаем TINY (дает 64 стак)
-            if (blockName.startsWith("hbm:")) {
+            if (blockName.startsWith("hbm:concrete") || blockName.startsWith("hbm:fusion_component") || blockName.startsWith("hbm:det_nuke") || blockName.startsWith("hbm:steel_scaffold") || blockName.startsWith("hbmspace:")) {
                 cir.setReturnValue(Size.TINY);
             }
         }
     }
 
-    /**
-     * Переопределяем getStackSize для блоков HBM
-     */
     @Inject(method = "getStackSize", at = @At("HEAD"), cancellable = true, remap = false)
     public void onGetStackSize(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
         if (stack == null || stack.isEmpty()) return;
@@ -56,8 +48,7 @@ public class MixinItemSize {
             Block block = itemBlock.getBlock();
             String blockName = block.getRegistryName().toString();
 
-            if (blockName.startsWith("hbm:")) {
-                // TINY + LIGHT = 64 стак
+            if (blockName.startsWith("hbm:concrete") || blockName.startsWith("hbm:fusion_component") || blockName.startsWith("hbm:det_nuke") || blockName.startsWith("hbm:steel_scaffold") || blockName.startsWith("hbmspace:")) {
                 cir.setReturnValue(64);
             }
         }

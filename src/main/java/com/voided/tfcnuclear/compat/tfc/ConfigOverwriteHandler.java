@@ -5,14 +5,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ConfigOverwriteHandler {
-    private static boolean hasRun = false;
 
     private static final String[] HBM_KEYS = {
             "2.L00_enableHematite",
@@ -21,105 +20,28 @@ public class ConfigOverwriteHandler {
     };
 
     private static final String TFC_KEY = "forceDefaultOreGenFile";
+    private static boolean hasRun = false;
 
-    private static final Map<String, Integer> STRUCTURE_CONFIGS = new HashMap<>();
-
-    static {
-        STRUCTURE_CONFIGS.put("S:03.01_radioSpawn", 3000);
-        STRUCTURE_CONFIGS.put("S:03.02_antennaSpawn", 2300);
-        STRUCTURE_CONFIGS.put("S:03.03_atomSpawn", 3000);
-        STRUCTURE_CONFIGS.put("S:03.04_vertibirdSpawn", 2500);
-        STRUCTURE_CONFIGS.put("S:03.05_dungeonSpawn", 500);
-        STRUCTURE_CONFIGS.put("S:03.06_relaySpawn", 2500);
-        STRUCTURE_CONFIGS.put("S:03.07_satelliteSpawn", 3000);
-        STRUCTURE_CONFIGS.put("S:03.08_bunkerSpawn", 3000);
-        STRUCTURE_CONFIGS.put("S:03.09_siloSpawn", 2500);
-        STRUCTURE_CONFIGS.put("S:03.10_factorySpawn", 3000);
-        STRUCTURE_CONFIGS.put("S:03.11_dudSpawn", 2500);
-        STRUCTURE_CONFIGS.put("S:03.12_spaceshipSpawn", 3000);
-        STRUCTURE_CONFIGS.put("S:03.13_barrelSpawn", 5000);
-        STRUCTURE_CONFIGS.put("S:03.14_broadcasterSpawn", 5000);
-        STRUCTURE_CONFIGS.put("S:03.15_landmineSpawn", 64);
-        STRUCTURE_CONFIGS.put("S:03.17_radHotsoptSpawn", 5000);
-        STRUCTURE_CONFIGS.put("S:03.18_vaultSpawn", 2500);
-        STRUCTURE_CONFIGS.put("S:03.20_geyserChlorineSpawn", 3000);
-        STRUCTURE_CONFIGS.put("S:03.21_geyserVaporSpawn", 500);
-    }
-
-    public static void  applyConfigOverwrites() {
-        if (!Loader.isModLoaded("tfc")) return;
+    public static void applyConfigOverwrites() {
+        if (!Loader.isModLoaded("tfc")) {
+            return;
+        }
 
         try {
-            modifyHbmConfig();
-            modifyTFCConfig();
             modifyBedrockOresJson();
             modifyDimensionsConfig();
-        } catch (Exception ignored) {}
-    }
-
-    private static void modifyHbmConfig() {
-        try {
-            Path configPath = Paths.get("config/hbm/hbm.cfg");
-            if (!Files.exists(configPath)) return;
-
-            List<String> lines = Files.readAllLines(configPath, StandardCharsets.UTF_8);
-            boolean modified = false;
-            List<String> newLines = new ArrayList<>();
-
-            for (String line : lines) {
-                String newLine = line;
-                for (String key : HBM_KEYS) {
-                    if (line.contains(key) && line.contains("=true")) {
-                        newLine = line.replace("=true", "=false");
-                        if (!line.equals(newLine)) {
-                            modified = true;
-                        }
-                        break;
-                    }
-                }
-                newLines.add(newLine);
-            }
-
-            if (modified) {
-                Files.write(configPath, newLines, StandardCharsets.UTF_8);
-            }
-
-        } catch (Exception ignored) {}
-    }
-
-    private static void modifyTFCConfig() {
-        try {
-            Path configPath = Paths.get("config/TerraFirmaCraft - General.cfg");
-            if (!Files.exists(configPath)) return;
-
-            List<String> lines = Files.readAllLines(configPath, StandardCharsets.UTF_8);
-            boolean modified = false;
-            List<String> newLines = new ArrayList<>();
-
-            for (String line : lines) {
-                String newLine = line;
-
-                if (line.contains(TFC_KEY) && line.contains("=true")) {
-                    newLine = line.replace("=true", "=false");
-                    if (!line.equals(newLine)) {
-                        modified = true;
-                    }
-                }
-
-                newLines.add(newLine);
-            }
-
-            if (modified) {
-                Files.write(configPath, newLines, StandardCharsets.UTF_8);
-            }
-
-        } catch (Exception ignored) {}
+            modifyHbmConfig();
+            modifyTFCConfig();
+        } catch (Exception ignored) {
+        }
     }
 
     private static void modifyBedrockOresJson() {
         try {
             Path configPath = Paths.get("config/hbm/hbm_bedrock_ores.json");
-            if (!Files.exists(configPath)) return;
+            if (!Files.exists(configPath)) {
+                return;
+            }
 
             String content = new String(Files.readAllBytes(configPath), StandardCharsets.UTF_8);
             String newContent = content;
@@ -143,23 +65,20 @@ public class ConfigOverwriteHandler {
                 Files.write(configPath, newContent.getBytes(StandardCharsets.UTF_8));
             }
 
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     private static void modifyDimensionsConfig() {
         try {
             Path configPath = Paths.get("config/hbm/hbm_dimensions.cfg");
-            if (!Files.exists(configPath)) return;
+            if (!Files.exists(configPath)) {
+                return;
+            }
 
             List<String> lines = Files.readAllLines(configPath, StandardCharsets.UTF_8);
             boolean modified = false;
             List<String> newLines = new ArrayList<>();
-
-            boolean inStructuresSection = false;
-            String currentKey = null;
-            int bracketDepth = 0;
-            boolean foundStructure = false;
-
             boolean inBedrockOilBlock = false;
             int bedrockOilBracketDepth = 0;
 
@@ -192,59 +111,91 @@ public class ConfigOverwriteHandler {
                     inBedrockOilBlock = false;
                 }
 
-                if (trimmedLine.equals("15_structures {")) {
-                    inStructuresSection = true;
-                    bracketDepth = 0;
-                }
-
-                if (inStructuresSection) {
-                    bracketDepth += line.chars().filter(ch -> ch == '{').count();
-                    bracketDepth -= line.chars().filter(ch -> ch == '}').count();
-                }
-
-                if (inStructuresSection && bracketDepth > 0) {
-                    for (String key : STRUCTURE_CONFIGS.keySet()) {
-                        if (trimmedLine.startsWith(key)) {
-                            currentKey = key;
-                            foundStructure = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (foundStructure && currentKey != null && bracketDepth > 0) {
-                    if (trimmedLine.matches("^-?\\d+:\\d+$")) {
-                        String[] parts = trimmedLine.split(":");
-                        if (parts.length == 2) {
-                            try {
-                                int dimId = Integer.parseInt(parts[0]);
-                                int currentValue = Integer.parseInt(parts[1]);
-                                int newValue = STRUCTURE_CONFIGS.get(currentKey);
-
-                                if (currentValue != newValue) {
-                                    newLine = line.replace(trimmedLine, dimId + ":" + newValue);
-                                    modified = true;
-                                }
-                            } catch (NumberFormatException ignored) {}
-                        }
-                        foundStructure = false;
-                        currentKey = null;
-                    }
-                }
-
                 newLines.add(newLine);
-
-                if (inStructuresSection && bracketDepth == 0 && trimmedLine.equals("}")) {
-                    inStructuresSection = false;
-                    foundStructure = false;
-                    currentKey = null;
-                }
             }
 
             if (modified) {
                 Files.write(configPath, newLines, StandardCharsets.UTF_8);
             }
 
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static void modifyHbmConfig() {
+        try {
+            Path configPath = Paths.get("config/hbm/hbm.cfg");
+            if (!Files.exists(configPath)) {
+                return;
+            }
+
+            List<String> lines = Files.readAllLines(configPath, StandardCharsets.UTF_8);
+            boolean modified = false;
+            List<String> newLines = new ArrayList<>();
+
+            for (String line : lines) {
+                String newLine = line;
+                for (String key : HBM_KEYS) {
+                    if (line.contains(key) && line.contains("=true")) {
+                        newLine = line.replace("=true", "=false");
+                        if (!line.equals(newLine)) {
+                            modified = true;
+                        }
+                        break;
+                    }
+                }
+                newLines.add(newLine);
+            }
+
+            if (modified) {
+                Files.write(configPath, newLines, StandardCharsets.UTF_8);
+            }
+
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static void modifyTFCConfig() {
+        try {
+            Path configPath = Paths.get("config/TerraFirmaCraft - General.cfg");
+            if (!Files.exists(configPath)) {
+                return;
+            }
+
+            List<String> lines = Files.readAllLines(configPath, StandardCharsets.UTF_8);
+            boolean modified = false;
+            List<String> newLines = new ArrayList<>();
+
+            for (String line : lines) {
+                String newLine = line;
+
+                if (line.contains(TFC_KEY) && line.contains("=true")) {
+                    newLine = line.replace("=true", "=false");
+                    if (!line.equals(newLine)) {
+                        modified = true;
+                    }
+                }
+
+                newLines.add(newLine);
+            }
+
+            if (modified) {
+                Files.write(configPath, newLines, StandardCharsets.UTF_8);
+            }
+
+        } catch (Exception ignored) {
+        }
+    }
+
+    @SubscribeEvent
+    public void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            return;
+        }
+
+        if (!hasRun) {
+            hasRun = true;
+            applyConfigOverwrites();
+        }
     }
 }

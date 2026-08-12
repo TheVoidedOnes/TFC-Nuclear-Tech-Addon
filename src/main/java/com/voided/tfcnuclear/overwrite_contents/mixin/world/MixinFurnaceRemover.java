@@ -21,7 +21,6 @@ public class MixinFurnaceRemover {
             at = @At("RETURN")
     )
     private void onStructureGenerated(World world, Random rand, StructureBoundingBox box, CallbackInfoReturnable<Boolean> cir) {
-        // После генерации проходим по bounding box и заменяем все печи
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
         for (int x = box.minX; x <= box.maxX; x++) {
@@ -29,7 +28,6 @@ public class MixinFurnaceRemover {
                 for (int z = box.minZ; z <= box.maxZ; z++) {
                     pos.setPos(x, y, z);
                     if (world.getBlockState(pos).getBlock() == Blocks.FURNACE) {
-                        // Заменяем на электрическую печь
                         world.setBlockState(pos, com.hbm.blocks.ModBlocks.machine_electric_furnace_off.getStateFromMeta(3), 2);
                     }
                 }

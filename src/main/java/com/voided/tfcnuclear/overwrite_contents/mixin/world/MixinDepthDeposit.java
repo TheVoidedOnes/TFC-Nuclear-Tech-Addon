@@ -2,7 +2,7 @@ package com.voided.tfcnuclear.overwrite_contents.mixin.world;
 
 import com.google.common.base.Predicate;
 import com.hbm.world.feature.DepthDeposit;
-import com.voided.tfcnuclear.compat.hbm.TFCBlockMatcher;
+import com.voided.tfcnuclear.compat.hbm.TFCStoneMatcher;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -31,7 +31,7 @@ public class MixinDepthDeposit {
     @Shadow
     private double fill;
 
-    private static final Predicate<IBlockState> TFC_PREDICATE = new TFCBlockMatcher(Blocks.STONE);
+    private static final Predicate<IBlockState> TFC_PREDICATE = new TFCStoneMatcher(Blocks.STONE);
 
     @Inject(
             method = "generateSphere",

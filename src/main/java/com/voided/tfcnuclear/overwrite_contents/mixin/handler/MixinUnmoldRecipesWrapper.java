@@ -22,17 +22,14 @@ public class MixinUnmoldRecipesWrapper {
 
         String metalName = metal.getRegistryName().getPath();
 
-        // Заменяем ТОЛЬКО для слитков (INGOT) указанных металлов
         boolean isTargetMetal = metalName.equals("steel") ||
                 metalName.equals("copper") ||
-                metalName.equals("lead");
+                metalName.equals("lead") || metalName.equals("zinc");
 
         if (!isTargetMetal) return;
 
-        // Если это НЕ форма слитка (INGOT) — НЕ меняем, оставляем TFC предмет
         if (type != Metal.ItemType.INGOT) return;
 
-        // Для слитков — заменяем на HBM
         ItemStack hbmIngot = null;
         switch (metalName) {
             case "steel":
@@ -44,6 +41,8 @@ public class MixinUnmoldRecipesWrapper {
             case "lead":
                 hbmIngot = getHBMItem("hbm:ingot_lead");
                 break;
+            case "zinc":
+                hbmIngot = getHBMItem("hbmspace:ingot_zinc");
         }
 
         if (hbmIngot != null && !hbmIngot.isEmpty()) {
@@ -51,7 +50,6 @@ public class MixinUnmoldRecipesWrapper {
                 java.lang.reflect.Field outputField = UnmoldRecipeWrapper.class.getDeclaredField("output");
                 outputField.setAccessible(true);
                 outputField.set(this, hbmIngot);
-                System.out.println("[TFC-Nuclear] JEI replaced INGOT output for: " + metalName);
             } catch (Exception e) {
                 e.printStackTrace();
             }

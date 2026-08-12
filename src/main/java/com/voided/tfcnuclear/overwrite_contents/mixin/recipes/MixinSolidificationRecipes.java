@@ -21,16 +21,8 @@ public abstract class MixinSolidificationRecipes {
     @Shadow
     public static void registerRecipe(FluidType type, int quantity, ItemStack output) {}
 
-    @Shadow
-    public static void registerSFAuto(FluidType fluid) {}
-
-    @Shadow
-    public static void registerSFAuto(FluidType fluid, long tuPerSF, Item fuel) {}
-
     @Inject(method = "registerDefaults", at = @At("TAIL"), remap = false)
     public void onRegisterDefaults(CallbackInfo ci) {
-
         registerRecipe(Fluids.fromName("AACS"), 100, new ItemStack(ModItems.ACID_ACTIVATED_CLAY));
-
     }
 }

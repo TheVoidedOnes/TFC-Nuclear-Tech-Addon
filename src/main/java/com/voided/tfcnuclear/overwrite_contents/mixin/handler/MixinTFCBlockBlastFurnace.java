@@ -19,16 +19,15 @@ import java.util.function.Predicate;
 public class MixinTFCBlockBlastFurnace {
 
     /**
-     * @author TFCNuclear
-     * @reason Replace stone matcher with custom one (brick_fire instead of fire_brick)
+     * @author Void
+     * @reason Compat
      */
     @Overwrite(remap = false)
     public static int getChimneyLevels(World world, BlockPos pos) {
-        // Заменяем stoneMatcher на наш кастомный
+
         Predicate<IBlockState> stoneMatcher = state ->
                 state.getBlock() == ModBlocks.brick_fire;
 
-        // sheetMatcher из оригинального кода
         Predicate<IBlockState> sheetMatcher = state -> {
             if (state.getBlock() instanceof BlockMetalSheet) {
                 BlockMetalSheet block = (BlockMetalSheet) state.getBlock();
@@ -38,7 +37,6 @@ public class MixinTFCBlockBlastFurnace {
             return false;
         };
 
-        // Полностью копируем структуру мультиблока с нашим stoneMatcher
         Multiblock chimney = new Multiblock()
                 .match(new BlockPos(0, 0, 0), state ->
                         state.getBlock() == net.dries007.tfc.objects.blocks.BlocksTFC.MOLTEN
@@ -64,7 +62,6 @@ public class MixinTFCBlockBlastFurnace {
                 .match(new BlockPos(1, 0, 1), sheetMatcher)
                 .match(new BlockPos(1, 0, 1), tile -> tile.getFace(EnumFacing.SOUTH) && tile.getFace(EnumFacing.EAST), TEMetalSheet.class);
 
-        // Оригинальная логика проверки уровней дымохода
         for (int i = 1; i < 6; i++) {
             BlockPos center = pos.up(i);
             if (!chimney.test(world, center)) {

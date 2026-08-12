@@ -1,13 +1,15 @@
 package com.voided.tfcnuclear.overwrite_contents.mixin.recipes;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.inventory.RecipesCommon;
+import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.inventory.fluid.FluidStack;
 import com.hbm.inventory.fluid.FluidType;
+import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.recipes.CrystallizerRecipes;
 import com.hbm.inventory.recipes.CrystallizerRecipes.CrystallizerRecipe;
 import com.hbm.items.ModItems;
 import com.hbm.util.Tuple;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,63 +36,50 @@ public abstract class MixinCrystallizerRecipes {
     @Shadow
     private static HashMap<Object, Integer> amounts;
 
-    /**
-     * Инжектируемся в конец метода registerDefaults()
-     * чтобы удалить и добавить свои рецепты
-     */
-    @Inject(
-            method = "registerDefaults",
-            at = @At("TAIL"),
-            remap = false
-    )
+    @Inject(method = "registerDefaults", at = @At("TAIL"), remap = false)
     private void onRegisterDefaults(CallbackInfo ci) {
         removeVanillaRecipes();
         addCustomRecipes();
     }
 
-    /**
-     * Удаление всех рецептов с ванильными рудами
-     */
     private void removeVanillaRecipes() {
-        // Список всех ванильных руд для удаления
         String[] vanillaOres = {
                 "oreCoal", "oreIron", "oreGold", "oreRedstone", "oreLapis",
                 "oreDiamond", "oreEmerald", "cobblestone"
         };
 
-        // Дополнительные руды из HBM
         String[] hbmOres = {
                 "oreSaltpeter", "oreSulfur", "oreCopper", "oreLead", "oreAluminum", "oreTrixite"
         };
 
-        // Удаляем все руды
         for (String ore : vanillaOres) {
             removeByOreDict(ore);
         }
         for (String ore : hbmOres) {
             removeByOreDict(ore);
         }
+
         removeByOutput("minecraft:diamond");
         removeByOutput("hbm:crystal_trixite");
-
+        removeByOutput("minecraft:leather");
+        removeByOutput("hbm:crystal_phosphorus");
+        removeByOutput("hbm:block_graphite");
+        removeByItem(Items.ROTTEN_FLESH);
+        removeByItem(ModItems.crystal_copper);
     }
 
-    /**
-     * Добавление кастомных рецептов
-     */
     private void addCustomRecipes() {
         final int baseTime = 600;
 
-        registerRecipe("tfcRedstone",     new CrystallizerRecipe(ModItems.crystal_redstone, baseTime).prod(0.05F));
-        registerRecipe("tfcLapis",        new CrystallizerRecipe(ModItems.crystal_lapis, baseTime).prod(0.05F));
-        registerRecipe("tfcSaltpeter",    new CrystallizerRecipe(ModItems.crystal_niter, baseTime).prod(0.05F));
-        registerRecipe("tfcCryolite",     new CrystallizerRecipe(ModItems.crystal_aluminium, baseTime).prod(0.05F));
-        registerRecipe("tfcSulfur",       new CrystallizerRecipe(ModItems.crystal_sulfur, baseTime).prod(0.05F));
-        registerRecipe("tfcCoal",         new CrystallizerRecipe(ModItems.crystal_coal, baseTime).prod(0.05F));
-        registerRecipe("cobblestone",     new CrystallizerRecipe(ModBlocks.reinforced_stone, baseTime).prod(0.05F));
+        registerRecipe("oreRedstoneTFC", new CrystallizerRecipe(ModItems.crystal_redstone, baseTime).prod(0.05F));
+        registerRecipe("oreLapisLazuliTFC", new CrystallizerRecipe(ModItems.crystal_lapis, baseTime).prod(0.05F));
+        registerRecipe("oreSaltpeterTFC", new CrystallizerRecipe(ModItems.crystal_niter, baseTime).prod(0.05F));
+        registerRecipe("oreCryoliteTFC", new CrystallizerRecipe(ModItems.crystal_aluminium, baseTime).prod(0.05F));
+        registerRecipe("oreSulfurTFC", new CrystallizerRecipe(ModItems.crystal_sulfur, baseTime).prod(0.05F));
+        registerRecipe("oreBituminousCoal", new CrystallizerRecipe(ModItems.crystal_coal, baseTime).prod(0.05F));
+        registerRecipe("cobblestone", new CrystallizerRecipe(ModBlocks.reinforced_stone, baseTime).prod(0.05F));
+        registerRecipe("oreApatite", new CrystallizerRecipe(com.voided.tfcnuclear.inventory.items.ModItems.CRYSTAL_APATITE, baseTime).prod(0.05F), new FluidStack(Fluids.SULFURIC_ACID, 500));
     }
-
-    // ========== Вспомогательные методы для удаления ==========
 
     private void removeByOreDict(String dictKey) {
         HashMap<Tuple.Pair<Object, FluidType>, CrystallizerRecipe> toRemove = new HashMap<>();
@@ -117,44 +106,17 @@ public abstract class MixinCrystallizerRecipes {
         removeByItemId(itemName, meta);
     }
 
-    private void removeByItem(String itemId) {
-        removeByItemId(itemId, -1);
-    }
-
-    private void removeByItem(String itemId, int meta) {
-        removeByItemId(itemId, meta);
-    }
-
     private void removeByItemId(String itemId, int meta) {
         HashMap<Tuple.Pair<Object, FluidType>, CrystallizerRecipe> toRemove = new HashMap<>();
 
         for (Map.Entry<Tuple.Pair<Object, FluidType>, CrystallizerRecipe> entry : recipes.entrySet()) {
             Object key = entry.getKey().getKey();
-            if (key instanceof RecipesCommon.ComparableStack) {
-                RecipesCommon.ComparableStack stack = (RecipesCommon.ComparableStack) key;
+            if (key instanceof ComparableStack) {
+                ComparableStack stack = (ComparableStack) key;
                 String id = Item.REGISTRY.getNameForObject(stack.item).toString();
                 if (id.equals(itemId) && (meta == -1 || stack.meta == meta)) {
                     toRemove.put(entry.getKey(), entry.getValue());
                 }
-            }
-        }
-
-        for (Tuple.Pair<Object, FluidType> key : toRemove.keySet()) {
-            recipes.remove(key);
-            amounts.remove(key.getKey());
-        }
-    }
-
-    private void removeByBlock(String blockId) {
-        removeByItemId(blockId, -1);
-    }
-
-    private void removeByFluid(FluidType fluid) {
-        HashMap<Tuple.Pair<Object, FluidType>, CrystallizerRecipe> toRemove = new HashMap<>();
-
-        for (Map.Entry<Tuple.Pair<Object, FluidType>, CrystallizerRecipe> entry : recipes.entrySet()) {
-            if (entry.getKey().getValue() == fluid) {
-                toRemove.put(entry.getKey(), entry.getValue());
             }
         }
 

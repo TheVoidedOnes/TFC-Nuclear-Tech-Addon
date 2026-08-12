@@ -1,14 +1,17 @@
 package com.voided.tfcnuclear.overwrite_contents.mixin.recipes;
 
 import com.hbm.inventory.RecipesCommon;
+import com.hbm.inventory.material.MaterialShapes;
+import com.hbm.inventory.material.Mats;
 import com.hbm.inventory.recipes.ArcFurnaceRecipes;
 import com.hbm.inventory.recipes.ArcFurnaceRecipes.ArcFurnaceRecipe;
 import com.hbm.util.Tuple;
-import com.voided.tfcnuclear.compat.hbm.NbtComparableBloomStack;
+import com.voided.tfcnuclear.compat.hbm.BloomArcFurnaceStack;
+import com.voided.tfcnuclear.inventory.items.ModItems;
+import com.voided.tfcnuclear.inventory.material.TFCNuclearMats;
 import net.dries007.tfc.api.capability.forge.CapabilityForgeable;
 import net.dries007.tfc.api.capability.forge.IForgeableMeasurableMetal;
 import net.dries007.tfc.api.types.Metal;
-import net.dries007.tfc.objects.items.ItemBloom;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -39,42 +42,48 @@ public abstract class MixinArcFurnaceRecipes {
     @Shadow
     private static void register(RecipesCommon.AStack input, ArcFurnaceRecipe output) {}
 
-    @Inject(
-            method = "registerDefaults",
-            at = @At("TAIL"),
-            remap = false
-    )
+    @Inject(method = "registerDefaults", at = @At("TAIL"), remap = false)
     private void onRegisterDefaults(CallbackInfo ci) {
-        // Добавляем кастомные рецепты для глины
-        addCustomRecipes();
-
-        // Удаляем рецепты руд
         removeByItemStack(new ItemStack(Items.BRICK));
         removeByOreDict("oreGold");
         removeByOreDict("oreIron");
         removeByOreDict("oreCopper");
         removeByOreDict("oreLead");
+        removeByOreDict("oreZinc");
+        removeByOreDict("oreCobalt");
+        removeByOreDict("ingotPhosphateCharge");
 
-        // Добавляем рецепты для крицы
+        addCustomRecipes();
         addBloomRecipes();
     }
 
-    // ========== Рецепты для глины ==========
     private void addCustomRecipes() {
+        RecipesCommon.ComparableStack phosphateCheck = new RecipesCommon.ComparableStack(ModItems.INGOT_PHOSPHATE_CHARGE, 1);
+        if (occupiedLiquid != null && occupiedLiquid.contains(phosphateCheck)) {
+            occupiedLiquid.remove(phosphateCheck);
+        }
+
         register(
                 new RecipesCommon.ComparableStack(Item.getByNameOrId("tfc:ceramics/unfired/clay_brick")),
                 new ArcFurnaceRecipe().solid(new ItemStack(Items.BRICK)));
+
         register(
                 new RecipesCommon.ComparableStack(Item.getByNameOrId("tfc:ceramics/unfired/fire_brick")),
                 new ArcFurnaceRecipe().solid(new ItemStack(Item.getByNameOrId("hbm:ingot_firebrick"))));
+
         register(
                 new RecipesCommon.ComparableStack(Item.getByNameOrId("minecraft:clay_ball")),
                 new ArcFurnaceRecipe().solid(new ItemStack(Item.getByNameOrId("hbm:ball_fireclay"))));
+
+        register(
+                new RecipesCommon.ComparableStack(ModItems.INGOT_PHOSPHATE_CHARGE, 1),
+                new ArcFurnaceRecipe().fluid(new Mats.MaterialStack(TFCNuclearMats.MAT_PHOSPHORUS_TFC, MaterialShapes.INGOT.q(1))));
     }
 
-    // ========== Рецепты для крицы ==========
     private void addBloomRecipes() {
-        if (!Loader.isModLoaded("tfc")) return;
+        if (!Loader.isModLoaded("tfc")) {
+            return;
+        }
 
         try {
             Item rawBloom = Item.getByNameOrId("tfc:bloom/unrefined");
@@ -84,16 +93,13 @@ public abstract class MixinArcFurnaceRecipes {
                 return;
             }
 
-            // Очищаем старые рецепты для крицы
             cleanExistingBloomRecipes();
 
-            // === РЕЦЕПТЫ: Сырая крица -> Очищенная крица (сохраняем количество) ===
             addRawToRefinedRecipe(rawBloom, refinedBloom, 100);
             addRawToRefinedRecipe(rawBloom, refinedBloom, 200);
             addRawToRefinedRecipe(rawBloom, refinedBloom, 300);
             addRawToRefinedRecipe(rawBloom, refinedBloom, 400);
 
-            // === РЕЦЕПТЫ: Очищенная крица -> Слитки (в обратном порядке) ===
             addRefinedToIngotRecipe(refinedBloom, 400, 4);
             addRefinedToIngotRecipe(refinedBloom, 300, 3);
             addRefinedToIngotRecipe(refinedBloom, 200, 2);
@@ -110,7 +116,7 @@ public abstract class MixinArcFurnaceRecipes {
             Tuple.Pair<RecipesCommon.AStack, ArcFurnaceRecipe> entry = iterator.next();
             RecipesCommon.AStack input = entry.getKey();
 
-            if (input instanceof NbtComparableBloomStack) {
+            if (input instanceof BloomArcFurnaceStack) {
                 iterator.remove();
             } else if (input instanceof RecipesCommon.ComparableStack) {
                 RecipesCommon.ComparableStack comp = (RecipesCommon.ComparableStack) input;
@@ -141,7 +147,7 @@ public abstract class MixinArcFurnaceRecipes {
             capOut.setMetalAmount(amount);
         }
 
-        NbtComparableBloomStack input = new NbtComparableBloomStack(inputStack);
+        BloomArcFurnaceStack input = new BloomArcFurnaceStack(inputStack);
         ArcFurnaceRecipe recipe = new ArcFurnaceRecipe().solid(outputStack);
 
         recipeList.add(new Tuple.Pair<>(input, recipe));
@@ -160,7 +166,7 @@ public abstract class MixinArcFurnaceRecipes {
             cap.setMetalAmount(bloomAmount);
         }
 
-        NbtComparableBloomStack input = new NbtComparableBloomStack(inputStack);
+        BloomArcFurnaceStack input = new BloomArcFurnaceStack(inputStack);
         ItemStack output = new ItemStack(Item.getByNameOrId("tfc:metal/ingot/wrought_iron"), ingotCount);
         ArcFurnaceRecipe recipe = new ArcFurnaceRecipe().solid(output);
 
@@ -170,8 +176,6 @@ public abstract class MixinArcFurnaceRecipes {
             occupiedSolid.add(new RecipesCommon.ComparableStack(inputItem));
         }
     }
-
-    // ========== Вспомогательные методы для удаления ==========
 
     private void removeByOreDict(String dictKey) {
         List<Tuple.Pair<RecipesCommon.AStack, ArcFurnaceRecipe>> toRemove = new ArrayList<>();
@@ -198,11 +202,13 @@ public abstract class MixinArcFurnaceRecipes {
             RecipesCommon.AStack key = entry.getKey();
             if (key instanceof RecipesCommon.ComparableStack) {
                 RecipesCommon.ComparableStack stack = (RecipesCommon.ComparableStack) key;
-                String itemId1 = Item.REGISTRY.getNameForObject(stack.item).toString();
-                String itemId2 = Item.REGISTRY.getNameForObject(stackToRemove.item).toString();
+                if (stack.item != null && stackToRemove.item != null) {
+                    String itemId1 = Item.REGISTRY.getNameForObject(stack.item).toString();
+                    String itemId2 = Item.REGISTRY.getNameForObject(stackToRemove.item).toString();
 
-                if (itemId1.equals(itemId2) && stack.meta == stackToRemove.meta) {
-                    toRemove.add(entry);
+                    if (itemId1.equals(itemId2) && stack.meta == stackToRemove.meta) {
+                        toRemove.add(entry);
+                    }
                 }
             }
         }
@@ -213,45 +219,6 @@ public abstract class MixinArcFurnaceRecipes {
     }
 
     private void removeByItemStack(ItemStack stackToRemove) {
-        RecipesCommon.ComparableStack comp = new RecipesCommon.ComparableStack(stackToRemove);
-        removeByComparableStack(comp);
-    }
-
-    private void removeByItemId(String itemId) {
-        List<Tuple.Pair<RecipesCommon.AStack, ArcFurnaceRecipe>> toRemove = new ArrayList<>();
-
-        for (Tuple.Pair<RecipesCommon.AStack, ArcFurnaceRecipe> entry : recipeList) {
-            RecipesCommon.AStack key = entry.getKey();
-            if (key instanceof RecipesCommon.ComparableStack) {
-                RecipesCommon.ComparableStack stack = (RecipesCommon.ComparableStack) key;
-                String id = Item.REGISTRY.getNameForObject(stack.item).toString();
-                if (id.equals(itemId)) {
-                    toRemove.add(entry);
-                }
-            }
-        }
-
-        for (Tuple.Pair<RecipesCommon.AStack, ArcFurnaceRecipe> entry : toRemove) {
-            recipeList.remove(entry);
-        }
-    }
-
-    private void removeByItemId(String itemId, int meta) {
-        List<Tuple.Pair<RecipesCommon.AStack, ArcFurnaceRecipe>> toRemove = new ArrayList<>();
-
-        for (Tuple.Pair<RecipesCommon.AStack, ArcFurnaceRecipe> entry : recipeList) {
-            RecipesCommon.AStack key = entry.getKey();
-            if (key instanceof RecipesCommon.ComparableStack) {
-                RecipesCommon.ComparableStack stack = (RecipesCommon.ComparableStack) key;
-                String id = Item.REGISTRY.getNameForObject(stack.item).toString();
-                if (id.equals(itemId) && stack.meta == meta) {
-                    toRemove.add(entry);
-                }
-            }
-        }
-
-        for (Tuple.Pair<RecipesCommon.AStack, ArcFurnaceRecipe> entry : toRemove) {
-            recipeList.remove(entry);
-        }
+        removeByComparableStack(new RecipesCommon.ComparableStack(stackToRemove));
     }
 }

@@ -19,17 +19,6 @@ import java.util.List;
 @Mixin(value = Mats.class, remap = false)
 public class MixinMats {
 
-    /**
-     * Настройка цвета расплавленного железа при инициализации класса
-     */
-    @Inject(method = "<clinit>", at = @At("RETURN"))
-    private static void onClassInit(CallbackInfo ci) {
-        Mats.MAT_IRON.setMoltenColor(0x604C44);
-    }
-
-    /**
-     * Перехватываем getMaterialsFromItem для динамической обработки крицы
-     */
     @Inject(
             method = "getMaterialsFromItem",
             at = @At("RETURN"),
@@ -38,6 +27,7 @@ public class MixinMats {
     )
     private static void onGetMaterialsFromItem(ItemStack stack, CallbackInfoReturnable<List<Mats.MaterialStack>> cir) {
         if (stack == null || stack.isEmpty()) return;
+
         if (!(stack.getItem() instanceof ItemBloom)) return;
 
         IForgeable cap = stack.getCapability(CapabilityForgeable.FORGEABLE_CAPABILITY, null);
@@ -50,11 +40,25 @@ public class MixinMats {
         int tfcAmount = metalCap.getMetalAmount();
         if (tfcAmount <= 0) return;
 
+        ItemBloom bloom = (ItemBloom) stack.getItem();
+        if (!bloom.canMelt(stack)) {
+            cir.setReturnValue(new ArrayList<>());
+            return;
+        }
+
         int hbmQuanta = (tfcAmount * 72) / 100;
         if (hbmQuanta <= 0) return;
 
         List<Mats.MaterialStack> result = new ArrayList<>();
         result.add(new Mats.MaterialStack(Mats.MAT_WROUGHTIRON, hbmQuanta));
         cir.setReturnValue(result);
+    }
+    @Inject(
+            method = "<clinit>",
+            at = @At("RETURN"),
+            remap = false
+    )
+    private static void onClassInit(CallbackInfo ci) {
+        Mats.MAT_IRON.setMoltenColor(0x6A4C3E);
     }
 }

@@ -5,7 +5,10 @@ import com.hbm.inventory.fluid.FluidType;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.recipes.ElectrolyserFluidRecipes;
 import com.hbm.items.ModItems;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.LoaderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,5 +58,14 @@ public abstract class MixinElectrolyserFluidRecipes {
                 25,
                 new ItemStack(ModItems.crystal_lead)
         ));
+        if (Loader.isModLoaded("hbmspace")) {
+            recipes.put(Fluids.fromName("ZS"), new ElectrolyserFluidRecipes.ElectrolysisRecipe(
+                    150,
+                    new FluidStack(Fluids.SULFURIC_ACID, 20),
+                    new FluidStack(Fluids.OXYGEN, 30),
+                    25,
+                    new ItemStack(Item.getByNameOrId("hbmspace:crystal_zinc"))
+            ));
+        }
     }
 }

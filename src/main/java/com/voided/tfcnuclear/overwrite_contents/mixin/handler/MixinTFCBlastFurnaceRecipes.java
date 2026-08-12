@@ -16,7 +16,6 @@ public class MixinTFCBlastFurnaceRecipes {
 
         String itemName = stack.getItem().getRegistryName().toString();
 
-        // Запрещаем все предметы с wrought_iron
         if (
                 itemName.contains("bloom") || itemName.contains("wrought") || itemName.contains("bars")
         ) {

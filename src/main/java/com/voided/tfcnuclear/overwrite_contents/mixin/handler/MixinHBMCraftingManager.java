@@ -34,11 +34,8 @@ public class MixinHBMCraftingManager {
             ironIngot = Items.IRON_INGOT;
             wroughtIron = Item.getByNameOrId("tfc:metal/ingot/wrought_iron");
         } catch (Exception e) {
-            // Игнорируем
         }
     }
-
-    // ===== ПЕРЕХВАТЫВАЕМ ВСЕ МЕТОДЫ РЕГИСТРАЦИИ РЕЦЕПТОВ =====
 
     @Inject(method = "addRecipeAuto(Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)V",
             at = @At("HEAD"), remap = false)
@@ -64,24 +61,18 @@ public class MixinHBMCraftingManager {
     @Inject(method = "add1To9Pair(Lnet/minecraft/item/Item;Lnet/minecraft/item/Item;)V",
             at = @At("HEAD"), remap = false)
     private static void onAdd1To9Pair(Item one, Item nine, CallbackInfo ci) {
-        // Перенаправляем вызов через GameRegistry
         if (one == ironIngot) {
             try {
-                // Создаем ItemStack из кованого железа
                 ItemStack oneStack = new ItemStack(wroughtIron);
                 ItemStack nineStack = new ItemStack(nine, 9);
                 Method method = net.minecraftforge.fml.common.registry.GameRegistry.class.getDeclaredMethod(
                         "addShapedRecipe", ResourceLocation.class, ResourceLocation.class, ItemStack.class, Object[].class);
                 method.setAccessible(true);
-                // Отменяем оригинальный вызов через ci.cancel()
                 ci.cancel();
             } catch (Exception e) {
-                // Игнорируем
             }
         }
     }
-
-    // ===== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ =====
 
     private static void replaceIronInArgs(Object[] args) {
         if (ironIngot == null || wroughtIron == null) return;
@@ -89,22 +80,18 @@ public class MixinHBMCraftingManager {
         for (int i = 0; i < args.length; i++) {
             Object obj = args[i];
 
-            // ItemStack
             if (obj instanceof ItemStack) {
                 ItemStack stack = (ItemStack) obj;
                 if (stack.getItem() == ironIngot) {
-                    // Создаем новый ItemStack с кованым железом
                     args[i] = new ItemStack(wroughtIron, stack.getCount(), stack.getMetadata());
                 }
             }
-            // OreDict строка
             else if (obj instanceof String) {
                 String str = (String) obj;
                 if (str.equalsIgnoreCase("ingotIron")) {
                     args[i] = "ingotWroughtIron";
                 }
             }
-            // Ingredient
             else if (obj instanceof Ingredient) {
                 Ingredient ingredient = (Ingredient) obj;
                 for (ItemStack stack : ingredient.getMatchingStacks()) {
@@ -117,9 +104,6 @@ public class MixinHBMCraftingManager {
         }
     }
 
-    /**
-     * Заменяет minecraft:stonebrick (мета 0-3) на OreDict "stoneBrick"
-     */
     private static void replaceStoneBrickInArgs(Object[] args) {
         for (int i = 0; i < args.length; i++) {
             Object obj = args[i];
@@ -130,25 +114,18 @@ public class MixinHBMCraftingManager {
                 if (stack.getItem() == stoneBrick) {
                     int meta = stack.getMetadata();
                     if (meta >= 0 && meta <= 3) {
-                        // Заменяем на OreDict строку "stoneBrick"
                         args[i] = "stoneBrick";
                     }
                 }
             }
-            // OreDict строка - проверяем, не является ли уже "stoneBrick"
             else if (obj instanceof String) {
-                // Если это уже "stoneBrick", оставляем как есть
-                // Если это другой строковый ключ, не трогаем
             }
-            // Ingredient - нужно проверить входящие стеки
             else if (obj instanceof Ingredient) {
                 Ingredient ingredient = (Ingredient) obj;
-                // Проверяем все матчинговые стеки
                 for (ItemStack stack : ingredient.getMatchingStacks()) {
                     if (stack != null && stack.getItem() == stoneBrick) {
                         int meta = stack.getMetadata();
                         if (meta >= 0 && meta <= 3) {
-                            // Заменяем на OreDict Ingredient
                             args[i] = new OreIngredient("stoneBrick");
                             break;
                         }
@@ -158,18 +135,15 @@ public class MixinHBMCraftingManager {
         }
     }
 
-    // Также инжектимся в конец метода init для второй проверки
     @Inject(method = "init", at = @At("TAIL"), remap = false)
     private static void onInit(CallbackInfo ci) {
         if (ironIngot == null || wroughtIron == null) return;
 
-        // Проходим по всем рецептам в реестре и заменяем
         try {
             net.minecraftforge.fml.common.registry.ForgeRegistries.RECIPES.forEach(recipe -> {
                 replaceInRecipe(recipe);
             });
         } catch (Exception e) {
-            // Игнорируем
         }
     }
 
@@ -179,14 +153,12 @@ public class MixinHBMCraftingManager {
             for (int i = 0; i < shaped.recipeItems.size(); i++) {
                 Ingredient ingredient = shaped.recipeItems.get(i);
                 if (ingredient != null && ingredient != Ingredient.EMPTY) {
-                    // Проверяем железо
                     for (ItemStack stack : ingredient.getMatchingStacks()) {
                         if (stack != null && stack.getItem() == ironIngot) {
                             shaped.recipeItems.set(i, Ingredient.fromItem(wroughtIron));
                             break;
                         }
                     }
-                    // Проверяем каменный кирпич
                     for (ItemStack stack : ingredient.getMatchingStacks()) {
                         if (stack != null && stack.getItem() == stoneBrick) {
                             int meta = stack.getMetadata();
@@ -203,14 +175,12 @@ public class MixinHBMCraftingManager {
             for (int i = 0; i < shapeless.recipeItems.size(); i++) {
                 Ingredient ingredient = shapeless.recipeItems.get(i);
                 if (ingredient != null && ingredient != Ingredient.EMPTY) {
-                    // Проверяем железо
                     for (ItemStack stack : ingredient.getMatchingStacks()) {
                         if (stack != null && stack.getItem() == ironIngot) {
                             shapeless.recipeItems.set(i, Ingredient.fromItem(wroughtIron));
                             break;
                         }
                     }
-                    // Проверяем каменный кирпич
                     for (ItemStack stack : ingredient.getMatchingStacks()) {
                         if (stack != null && stack.getItem() == stoneBrick) {
                             int meta = stack.getMetadata();
@@ -239,11 +209,9 @@ public class MixinHBMCraftingManager {
                 Object obj = input[i];
                 if (obj instanceof ItemStack) {
                     ItemStack stack = (ItemStack) obj;
-                    // Замена железа
                     if (stack.getItem() == ironIngot) {
                         input[i] = new ItemStack(wroughtIron, stack.getCount(), stack.getMetadata());
                     }
-                    // Замена каменного кирпича
                     if (stack.getItem() == stoneBrick) {
                         int meta = stack.getMetadata();
                         if (meta >= 0 && meta <= 3) {
@@ -252,14 +220,12 @@ public class MixinHBMCraftingManager {
                     }
                 } else if (obj instanceof Ingredient) {
                     Ingredient ingredient = (Ingredient) obj;
-                    // Замена железа
                     for (ItemStack stack : ingredient.getMatchingStacks()) {
                         if (stack != null && stack.getItem() == ironIngot) {
                             input[i] = Ingredient.fromItem(wroughtIron);
                             break;
                         }
                     }
-                    // Замена каменного кирпича
                     for (ItemStack stack : ingredient.getMatchingStacks()) {
                         if (stack != null && stack.getItem() == stoneBrick) {
                             int meta = stack.getMetadata();
@@ -274,16 +240,13 @@ public class MixinHBMCraftingManager {
                     for (int j = 0; j < list.size(); j++) {
                         ItemStack stack = list.get(j);
                         if (stack != null) {
-                            // Замена железа
                             if (stack.getItem() == ironIngot) {
                                 list.set(j, new ItemStack(wroughtIron, stack.getCount(), stack.getMetadata()));
                             }
-                            // Замена каменного кирпича
                             if (stack.getItem() == stoneBrick) {
                                 int meta = stack.getMetadata();
                                 if (meta >= 0 && meta <= 3) {
                                     list.set(j, new ItemStack(stoneBrick, stack.getCount(), meta));
-                                    // Можно также заменить на OreDict, но для List это сложнее
                                 }
                             }
                         }
@@ -291,7 +254,6 @@ public class MixinHBMCraftingManager {
                 }
             }
         } catch (Exception e) {
-            // Игнорируем
         }
     }
 
@@ -305,11 +267,9 @@ public class MixinHBMCraftingManager {
                 Object obj = input.get(i);
                 if (obj instanceof ItemStack) {
                     ItemStack stack = (ItemStack) obj;
-                    // Замена железа
                     if (stack.getItem() == ironIngot) {
                         input.set(i, new ItemStack(wroughtIron, stack.getCount(), stack.getMetadata()));
                     }
-                    // Замена каменного кирпича
                     if (stack.getItem() == stoneBrick) {
                         int meta = stack.getMetadata();
                         if (meta >= 0 && meta <= 3) {
@@ -318,14 +278,12 @@ public class MixinHBMCraftingManager {
                     }
                 } else if (obj instanceof Ingredient) {
                     Ingredient ingredient = (Ingredient) obj;
-                    // Замена железа
                     for (ItemStack stack : ingredient.getMatchingStacks()) {
                         if (stack != null && stack.getItem() == ironIngot) {
                             input.set(i, Ingredient.fromItem(wroughtIron));
                             break;
                         }
                     }
-                    // Замена каменного кирпича
                     for (ItemStack stack : ingredient.getMatchingStacks()) {
                         if (stack != null && stack.getItem() == stoneBrick) {
                             int meta = stack.getMetadata();
@@ -340,11 +298,9 @@ public class MixinHBMCraftingManager {
                     for (int j = 0; j < list.size(); j++) {
                         ItemStack stack = list.get(j);
                         if (stack != null) {
-                            // Замена железа
                             if (stack.getItem() == ironIngot) {
                                 list.set(j, new ItemStack(wroughtIron, stack.getCount(), stack.getMetadata()));
                             }
-                            // Замена каменного кирпича
                             if (stack.getItem() == stoneBrick) {
                                 int meta = stack.getMetadata();
                                 if (meta >= 0 && meta <= 3) {
@@ -356,7 +312,6 @@ public class MixinHBMCraftingManager {
                 }
             }
         } catch (Exception e) {
-            // Игнорируем
         }
     }
 }

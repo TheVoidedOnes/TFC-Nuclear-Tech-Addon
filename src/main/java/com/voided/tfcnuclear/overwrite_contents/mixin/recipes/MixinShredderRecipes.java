@@ -3,6 +3,7 @@ package com.voided.tfcnuclear.overwrite_contents.mixin.recipes;
 import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.inventory.recipes.ShredderRecipes;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.oredict.OreDictionary;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -10,10 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Mixin(value = ShredderRecipes.class, remap = false)
 public abstract class MixinShredderRecipes {
@@ -54,6 +52,9 @@ public abstract class MixinShredderRecipes {
             "hbm:ore_gneiss_gold",
             "hbm:stone_resource",
             "hbm:crystal_trixite",
+            "hbm:crystal_phosphorus",
+            "hbm:ore_nether_fire",
+            "hbm:coal_infernal",
 
             "tfc:metal/ingot/bronze",
             "tfc:metal/ingot/black_bronze",
@@ -73,6 +74,7 @@ public abstract class MixinShredderRecipes {
             "tfc:ore/graphite",
             "tfc:powder_sulfur",
             "tfc:ore/kaolinite",
+            "tfc:metal/ingot/nickel",
 
             "minecraft:gold_ore",
             "minecraft:gold_ingot",
@@ -93,7 +95,6 @@ public abstract class MixinShredderRecipes {
             "minecraft:stonebrick"
     };
 
-    // Массив OreDict имён для удаления
     private static final String[] ORE_DICT_TO_REMOVE = {
             "ingotMalachite",
             "gemPetCoke",
@@ -101,33 +102,34 @@ public abstract class MixinShredderRecipes {
             "gemCoalCoke",
             "blockCoalCoke",
             "blockLigniteCoke",
-            "blockPetCoke"
+            "blockPetCoke",
+            "oreZinc"
+    };
+
+    private static final String[] HBMSPACE_EXTRA_REMOVE = {
+            "tfc:metal/ingot/zinc"
     };
 
     @Inject(method = "registerPost", at = @At("RETURN"))
     private void onRegisterPost(CallbackInfo ci) {
-        // 1. Удаляем рецепты по конкретным предметам
         removeRecipesByItem();
-
-        // 2. Удаляем рецепты по OreDict
         removeRecipesByOreDict();
-
-        // 3. Добавляем свои рецепты
         addCustomRecipes();
-
-        // 4. Очищаем JEI кеш
         clearJeiCache();
     }
 
-    /**
-     * Удаляет рецепты по конкретным ID предметов
-     */
     private void removeRecipesByItem() {
+        List<String> itemsToRemove = new ArrayList<>(Arrays.asList(INPUT_ITEMS_TO_REMOVE));
+
+        if (Loader.isModLoaded("hbmspace")) {
+            itemsToRemove.addAll(Arrays.asList(HBMSPACE_EXTRA_REMOVE));
+        }
+
         List<ComparableStack> toRemove = new ArrayList<>();
         for (Map.Entry<ComparableStack, ItemStack> entry : shredderRecipes.entrySet()) {
             ItemStack input = entry.getKey().toStack();
             if (input.isEmpty()) continue;
-            if (matchesInputItem(input)) {
+            if (matchesInputItem(input, itemsToRemove)) {
                 toRemove.add(entry.getKey());
             }
         }
@@ -136,9 +138,6 @@ public abstract class MixinShredderRecipes {
         }
     }
 
-    /**
-     * Удаляет рецепты по OreDict именам
-     */
     private void removeRecipesByOreDict() {
         List<ComparableStack> toRemove = new ArrayList<>();
 
@@ -146,22 +145,18 @@ public abstract class MixinShredderRecipes {
             List<ItemStack> ores = OreDictionary.getOres(oreDictName);
 
             if (ores.isEmpty()) {
-                System.out.println("[TFC-Nuclear] OreDict not found for removal: " + oreDictName);
                 continue;
             }
 
-            // Для каждого предмета из OreDict проверяем наличие рецепта
             for (ItemStack ore : ores) {
                 if (ore.isEmpty()) continue;
 
                 ComparableStack comp = new ComparableStack(ore).makeSingular();
 
-                // Проверяем точное совпадение
                 if (shredderRecipes.containsKey(comp)) {
                     toRemove.add(comp);
                 }
 
-                // Проверяем с wildcard метой (если есть)
                 ComparableStack wildcardComp = new ComparableStack(ore.getItem(), 1, OreDictionary.WILDCARD_VALUE);
                 if (shredderRecipes.containsKey(wildcardComp)) {
                     toRemove.add(wildcardComp);
@@ -169,19 +164,11 @@ public abstract class MixinShredderRecipes {
             }
         }
 
-        // Удаляем найденные рецепты
         for (ComparableStack key : toRemove) {
             shredderRecipes.remove(key);
         }
-
-        if (!toRemove.isEmpty()) {
-            System.out.println("[TFC-Nuclear] Removed " + toRemove.size() + " shredder recipes via OreDict");
-        }
     }
 
-    /**
-     * Добавляет все кастомные рецепты
-     */
     private void addCustomRecipes() {
         addRecipeByItem("tfc:metal/ingot/black_bronze", 0, "tfc:metal/dust/black_bronze", 0, 1);
         addRecipeByItem("tfc:metal/ingot/bronze", 0, "tfc:metal/dust/bronze", 0, 1);
@@ -207,7 +194,7 @@ public abstract class MixinShredderRecipes {
         addRecipeByItem("tfc:ore/sulfur", 0, "hbm:sulfur", 0, 2);
         addRecipeByItem("tfc:ore/borax", 0, "hbm:powder_borax", 0, 2);
         addRecipeByItem("tfc:ore/lignite", 0, "hbm:powder_lignite", 0, 2);
-        addRecipeByItem("tfc:ore/graphite", 0, "tfc:powder/graphite", 0, 2);
+        addRecipeByItem("tfc:ore/graphite", 0, "tfc:powder/graphite", 0, 4);
         addRecipeByItem("tfc:ore/bituminous_coal", 0, "hbm:powder_coal", 0, 2);
         addRecipeByItem("tfc:ore/petryfied_wood", 0, "hbm:powder_coal_tiny", 0, 4);
         addRecipeByItem("hbm:stone_resource", 1, "hbm:powder_asbestos", 0, 2);
@@ -215,6 +202,11 @@ public abstract class MixinShredderRecipes {
         addRecipeByItem("hbm:stone_resource", 4, "hbm:powder_limestone", 0, 4);
         addRecipeByItem("tfc:ore/kaolinite", 0, "tfc:powder/kaolinite", 0, 6);
         addRecipeByItem("tfc:ore/petrified_wood", 0, "hbm:powder_coal_tiny", 0, 4);
+        addRecipeByItem("tfc:metal/ingot/nickel", 0, "tfc:metal/dust/nickel", 0, 1);
+        addRecipeByItem("minecraft:bone", 0, "minecraft:dye", 15, 3);
+        addRecipeByItem("minecraft:bone_block", 0, "minecraft:dye", 15, 9);
+        addRecipeByItem("hbm:crystal_phosphorus", 0, "hbm:powder_fire", 0, 4);
+        addRecipeByItem("tfc:ore/selenite", 0, "hbm:powder_quartz", 0, 2);
 
         addOreDictRecipe("rockFlux", "hbm:powder_flux", 0, 1);
         addOreDictRecipe("sand", "hbm:dust", 0, 2);
@@ -224,22 +216,18 @@ public abstract class MixinShredderRecipes {
         addOreDictRecipe("stoneBrick", "minecraft:gravel", 0, 1);
     }
 
-    /**
-     * Очищает кеш JEI
-     */
     private void clearJeiCache() {
         try {
             java.lang.reflect.Field jeiField = ShredderRecipes.class.getDeclaredField("jeiShredderRecipes");
             jeiField.setAccessible(true);
             jeiField.set(null, null);
         } catch (Exception e) {
-            // Игнорируем ошибки
         }
     }
 
-    private static boolean matchesInputItem(ItemStack input) {
+    private static boolean matchesInputItem(ItemStack input, List<String> itemsToRemove) {
         String registryName = input.getItem().getRegistryName().toString();
-        for (String target : INPUT_ITEMS_TO_REMOVE) {
+        for (String target : itemsToRemove) {
             if (registryName.equals(target)) {
                 return true;
             }
@@ -247,9 +235,6 @@ public abstract class MixinShredderRecipes {
         return false;
     }
 
-    /**
-     * Добавляет рецепт для шредера с указанным предметом
-     */
     private void addRecipeByItem(String inputItemId, int inputMeta, String outputItemId, int outputMeta, int outputCount) {
         ItemStack input = getItemStack(inputItemId, inputMeta, 1);
         ItemStack output = getItemStack(outputItemId, outputMeta, outputCount);
@@ -266,19 +251,14 @@ public abstract class MixinShredderRecipes {
         return ItemStack.EMPTY;
     }
 
-    /**
-     * Добавляет рецепт для шредера с использованием OreDict
-     */
     private void addOreDictRecipe(String oreDictName, String outputItemId, int outputMeta, int outputCount) {
         List<ItemStack> ores = OreDictionary.getOres(oreDictName);
         if (ores.isEmpty()) {
-            System.out.println("[TFC-Nuclear] OreDict not found for Shredder: " + oreDictName);
             return;
         }
 
         ItemStack output = getItemStack(outputItemId, outputMeta, outputCount);
         if (output.isEmpty()) {
-            System.out.println("[TFC-Nuclear] Output item not found: " + outputItemId);
             return;
         }
 

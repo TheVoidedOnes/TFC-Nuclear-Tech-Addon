@@ -10,7 +10,7 @@ public class ItemBase extends Item {
     public ItemBase(String name) {
         setRegistryName("tfcnuclear", name);
         setTranslationKey(name);
-        setCreativeTab(CreativeTabs.MATERIALS);
+        setCreativeTab(CreativeTabs.MISC);
     }
 
     @Override
